@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# D&D 5E Character Generator
 
-## Getting Started
+Generate D&D 5th Edition characters and NPCs instantly using AI. Configure race, class, subclass, level, and background — or let the generator surprise you with a fully random character.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Install dependencies:**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```bash
+   npm install
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **Add your OpenAI API key:**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   Copy `.env.example` to `.env.local` and replace the placeholder with your key:
 
-## Learn More
+   ```bash
+   cp .env.example .env.local
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+   Get an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Run the dev server:**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+4. Open [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Next.js** (App Router) — React frontend + API routes
+- **TypeScript** — type-safe character schema
+- **Tailwind CSS** — dark fantasy-themed UI
+- **OpenAI API** (`gpt-4o-mini`) — AI-powered character generation
+- **Zod** — runtime schema validation
+
+## Included Sourcebooks
+
+Races, classes, subclasses, and backgrounds are drawn from:
+
+- **Player's Handbook** (PHB)
+- **Xanathar's Guide to Everything** (XGtE)
+- **Tasha's Cauldron of Everything** (TCoE)
+- **Mordenkainen Presents: Monsters of the Multiverse** (MotM)
+- **Sword Coast Adventurer's Guide** (SCAG)
+- **Elemental Evil Player's Companion** (EEPC)
+- **Fizban's Treasury of Dragons**
+- **Curse of Strahd**
+
+## How It Works
+
+1. Pick your constraints (race, race variant, class, subclass, level, background) or hit **Fully Random**.
+2. The app sends your choices to a Next.js API route, which calls the OpenAI API with a structured prompt.
+3. The AI returns a complete character as JSON, validated against a strict Zod schema.
+4. The character is displayed and automatically saved to your browser's localStorage.
+5. Load or delete past characters from the history sidebar.
