@@ -41,6 +41,7 @@ Generate D&D 5th Edition characters and NPCs instantly using AI. Configure race,
 Races, classes, subclasses, and backgrounds are drawn from:
 
 - **Player's Handbook** (PHB)
+- **Dungeon Master's Guide** (DMG)
 - **Xanathar's Guide to Everything** (XGtE)
 - **Tasha's Cauldron of Everything** (TCoE)
 - **Mordenkainen Presents: Monsters of the Multiverse** (MotM)

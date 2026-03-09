@@ -1,6 +1,6 @@
 import { GenerateInput } from "./schemas";
 
-export const SYSTEM_PROMPT = `You are a D&D 5E (2014) character generator. Use rules from: PHB, XGtE, TCoE, MotM, SCAG, EEPC, Fizban's, Curse of Strahd.
+export const SYSTEM_PROMPT = `You are a D&D 5E (2014) character generator. Use rules from: PHB, DMG, XGtE, TCoE, MotM, SCAG, EEPC, Fizban's, Curse of Strahd.
 
 Rules:
 - Ability scores: point-buy/standard-array range (8-16 before racials, max 20 after).

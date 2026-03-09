@@ -5,6 +5,7 @@ import CharacterForm from "@/components/CharacterForm";
 import CharacterSheet from "@/components/CharacterSheet";
 import CharacterHistory from "@/components/CharacterHistory";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import SourcesModal from "@/components/SourcesModal";
 import { EnrichedCharacter, GenerateInput, SavedCharacter } from "@/lib/schemas";
 import {
   saveCharacter,
@@ -18,6 +19,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showSources, setShowSources] = useState(false);
 
   useEffect(() => {
     setSavedCharacters(getCharacters());
@@ -133,7 +135,26 @@ export default function Home() {
             <p className="mt-2 text-stone-400">
               Create a 5th Edition (2014) character in seconds
             </p>
+            <button
+              onClick={() => setShowSources(true)}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-amber-900/30 px-3 py-1.5 text-sm text-stone-400 transition hover:border-amber-700/40 hover:text-amber-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="h-4 w-4"
+              >
+                <path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.04a.75.75 0 00-.546-.721A9.006 9.006 0 0015 2a8.963 8.963 0 00-4.25 1.065V16.82zM9.25 4.065A8.963 8.963 0 005 3a9.006 9.006 0 00-2.454.319A.75.75 0 002 4.04v12.02a.75.75 0 00.954.721A7.462 7.462 0 015 16.5c1.578 0 3.05.488 4.25 1.32V4.065z" />
+              </svg>
+              Sources
+            </button>
           </header>
+
+          <SourcesModal
+            open={showSources}
+            onClose={() => setShowSources(false)}
+          />
 
           {/* Form card */}
           <section className="mb-8 rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6">

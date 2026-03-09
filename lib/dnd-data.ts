@@ -93,6 +93,7 @@ export const SUBCLASSES: Record<string, string[]> = {
   ],
   Cleric: [
     "Arcana Domain",
+    "Death Domain",
     "Forge Domain",
     "Grave Domain",
     "Knowledge Domain",
@@ -147,6 +148,7 @@ export const SUBCLASSES: Record<string, string[]> = {
     "Oath of Redemption",
     "Oath of Vengeance",
     "Oath of the Watchers",
+    "Oathbreaker",
   ],
   Ranger: [
     "Beast Master",
