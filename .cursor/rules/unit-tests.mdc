@@ -1,0 +1,38 @@
+---
+description: Unit test conventions for Vitest test files
+globs: **/*.test.ts
+alwaysApply: true
+---
+
+# Unit Test Conventions
+
+## Framework
+
+- Use **Vitest** with `import { describe, it, expect } from "vitest"`
+- Tests live in `lib/__tests__/` alongside the code they cover
+- DOM-dependent tests use `// @vitest-environment happy-dom` at the top of the file
+
+## Assertion Style
+
+- Assert on whole objects with `toMatchObject` or `toEqual` unless specifically targeting an individual slice of a large object
+- Avoid long chains of per-field `.toBe()` assertions when a single object assertion is clearer
+
+```typescript
+// ❌ BAD
+expect(result.name).toBe(char.name);
+expect(result.race).toBe(char.race);
+expect(result.class).toBe(char.class);
+
+// ✅ GOOD
+expect(result).toMatchObject(char);
+```
+
+## Structure
+
+- Group related tests under `describe` blocks by function or behavior
+- Use clear, specific `it` descriptions that read as sentences
+- Build test data with factory functions (e.g. `makeCharacter(overrides)`) to reduce boilerplate
+
+## Prompting
+
+- When adding or editing unit tests, **ask the user** if they want to add any new conventions to this rule file
