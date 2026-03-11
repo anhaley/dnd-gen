@@ -7,11 +7,6 @@ import CharacterHistory from "@/components/CharacterHistory";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import SourcesModal from "@/components/SourcesModal";
 import { EnrichedCharacter, GenerateInput, SavedCharacter } from "@/lib/schemas";
-import {
-  saveCharacter,
-  getCharacters,
-  deleteCharacter,
-} from "@/lib/storage";
 
 export default function Home() {
   const [character, setCharacter] = useState<SavedCharacter | null>(null);
@@ -22,8 +17,18 @@ export default function Home() {
   const [showSources, setShowSources] = useState(false);
 
   useEffect(() => {
-    setSavedCharacters(getCharacters());
+    fetch("/api/characters")
+      .then((res) => res.json())
+      .then((data) => setSavedCharacters(data))
+      .catch(() => {});
   }, []);
+
+  async function refreshHistory() {
+    try {
+      const res = await fetch("/api/characters");
+      if (res.ok) setSavedCharacters(await res.json());
+    } catch {}
+  }
 
   const handleGenerate = useCallback(async (input: GenerateInput) => {
     setIsLoading(true);
@@ -42,9 +47,20 @@ export default function Home() {
       }
 
       const data: EnrichedCharacter = await res.json();
-      const saved = saveCharacter(data);
+
+      const saveRes = await fetch("/api/characters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!saveRes.ok) {
+        throw new Error("Failed to save character");
+      }
+
+      const saved: SavedCharacter = await saveRes.json();
       setCharacter(saved);
-      setSavedCharacters(getCharacters());
+      await refreshHistory();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Something went wrong"
@@ -60,12 +76,14 @@ export default function Home() {
     setShowHistory(false);
   }
 
-  function handleDeleteCharacter(id: string) {
-    deleteCharacter(id);
-    setSavedCharacters(getCharacters());
-    if (character?.id === id) {
-      setCharacter(null);
-    }
+  async function handleDeleteCharacter(id: string) {
+    try {
+      await fetch(`/api/characters/${id}`, { method: "DELETE" });
+      await refreshHistory();
+      if (character?.id === id) {
+        setCharacter(null);
+      }
+    } catch {}
   }
 
   return (

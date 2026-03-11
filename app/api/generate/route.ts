@@ -7,6 +7,7 @@ import { enrichCharacter } from "@/lib/combat";
 
 export async function POST(request: Request) {
   try {
+    console.log("[generate] POST /api/generate");
     const body = await request.json();
     const input = GenerateInputSchema.parse(body);
     const userPrompt = buildUserPrompt(input);
@@ -40,6 +41,10 @@ export async function POST(request: Request) {
         { error: "No response from OpenAI" },
         { status: 502 }
       );
+    }
+
+    if (character.raceVariant === "null") {
+      character.raceVariant = null;
     }
 
     const enriched = enrichCharacter(character);

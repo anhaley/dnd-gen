@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { EnrichedCharacter, EnrichedWeapon } from "@/lib/schemas";
 
 interface CharacterSheetProps {
@@ -25,7 +26,7 @@ export default function CharacterSheet({ character }: CharacterSheetProps) {
         </h2>
         <p className="mt-1 text-lg text-stone-400">
           Level {character.level}{" "}
-          {character.raceVariant
+          {character.raceVariant && character.raceVariant !== "null"
             ? `${character.raceVariant} ${character.race}`
             : character.race}{" "}
           {character.class}
@@ -42,7 +43,7 @@ export default function CharacterSheet({ character }: CharacterSheetProps) {
         <StatBox
           label="AC"
           value={String(character.armorClass)}
-          subtitle={character.armorClassBreakdown}
+          tooltip={character.armorClassBreakdown}
         />
         <StatBox label="Speed" value={character.speed} />
         <StatBox label="Prof. Bonus" value={`+${character.proficiencyBonus}`} />
@@ -134,20 +135,44 @@ export default function CharacterSheet({ character }: CharacterSheetProps) {
 function StatBox({
   label,
   value,
-  subtitle,
+  tooltip,
 }: {
   label: string;
   value: string;
-  subtitle?: string;
+  tooltip?: string;
 }) {
+  const [showTip, setShowTip] = useState(false);
+
   return (
-    <div className="flex flex-col items-center rounded-lg border border-amber-900/20 bg-stone-900/40 px-3 py-2">
+    <div className="relative flex flex-col items-center rounded-lg border border-amber-900/20 bg-stone-900/40 px-3 py-2">
       <span className="text-xs font-medium uppercase tracking-wider text-stone-500">
         {label}
+        {tooltip && (
+          <button
+            onClick={() => setShowTip((prev) => !prev)}
+            className="ml-1 inline-flex align-middle text-stone-600 transition hover:text-amber-400"
+            aria-label={`${label} details`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className="h-3 w-3"
+            >
+              <path
+                fillRule="evenodd"
+                d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0Zm-6-3.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM7.5 7a.5.5 0 0 0 0 1h.25v2.5h-.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1H9V7.5a.5.5 0 0 0-.5-.5h-1Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
       </span>
       <span className="mt-0.5 text-xl font-bold text-amber-100">{value}</span>
-      {subtitle && (
-        <span className="mt-0.5 text-xs text-stone-500">{subtitle}</span>
+      {showTip && tooltip && (
+        <div className="absolute top-full z-10 mt-1 whitespace-nowrap rounded-md border border-amber-900/30 bg-stone-900 px-2.5 py-1.5 text-xs text-stone-300 shadow-lg">
+          {tooltip}
+        </div>
       )}
     </div>
   );
