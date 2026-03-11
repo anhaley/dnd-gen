@@ -35,6 +35,7 @@ export const CharacterSchema = z.object({
   abilityScores: AbilityScoresSchema,
   hitPoints: z.number(),
   armorClass: z.number(),
+  armorClassBreakdown: z.string(),
   speed: z.string(),
   proficiencyBonus: z.number(),
   savingThrows: z.array(z.string()),

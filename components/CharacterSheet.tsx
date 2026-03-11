@@ -39,7 +39,11 @@ export default function CharacterSheet({ character }: CharacterSheetProps) {
       {/* Core stats bar */}
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         <StatBox label="HP" value={String(character.hitPoints)} />
-        <StatBox label="AC" value={String(character.armorClass)} />
+        <StatBox
+          label="AC"
+          value={String(character.armorClass)}
+          subtitle={character.armorClassBreakdown}
+        />
         <StatBox label="Speed" value={character.speed} />
         <StatBox label="Prof. Bonus" value={`+${character.proficiencyBonus}`} />
       </div>
@@ -127,13 +131,24 @@ export default function CharacterSheet({ character }: CharacterSheetProps) {
   );
 }
 
-function StatBox({ label, value }: { label: string; value: string }) {
+function StatBox({
+  label,
+  value,
+  subtitle,
+}: {
+  label: string;
+  value: string;
+  subtitle?: string;
+}) {
   return (
     <div className="flex flex-col items-center rounded-lg border border-amber-900/20 bg-stone-900/40 px-3 py-2">
       <span className="text-xs font-medium uppercase tracking-wider text-stone-500">
         {label}
       </span>
       <span className="mt-0.5 text-xl font-bold text-amber-100">{value}</span>
+      {subtitle && (
+        <span className="mt-0.5 text-xs text-stone-500">{subtitle}</span>
+      )}
     </div>
   );
 }
