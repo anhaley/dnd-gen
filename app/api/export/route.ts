@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     const safeName = body.name.replace(/[^a-zA-Z0-9_-]/g, "_");
 
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
