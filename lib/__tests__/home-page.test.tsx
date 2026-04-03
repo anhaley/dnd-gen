@@ -28,9 +28,13 @@ vi.mock("@/components/CharacterForm", () => ({
   },
 }));
 
+let capturedSheetOnChange: ((character: EnrichedCharacter) => void) | null = null;
+
 vi.mock("@/components/CharacterSheet", () => ({
-  default: ({ character }: { character: unknown }) =>
-    <div data-testid="character-sheet" data-name={(character as { name: string }).name} />,
+  default: ({ character, editable, onChange }: { character: unknown; editable?: boolean; onChange?: (c: EnrichedCharacter) => void }) => {
+    if (onChange) capturedSheetOnChange = onChange;
+    return <div data-testid="character-sheet" data-name={(character as { name: string }).name} data-editable={editable ?? false} />;
+  },
 }));
 
 vi.mock("@/components/CharacterHistory", () => ({
@@ -111,6 +115,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   setSession("unauthenticated");
   capturedOnGenerate = null;
+  capturedSheetOnChange = null;
   globalThis.fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: () => Promise.resolve([]),
@@ -335,6 +340,81 @@ describe("Home page", () => {
       await triggerGeneration();
 
       expect(screen.queryByText(/to save characters and build your collection/i)).toBeNull();
+    });
+  });
+
+  describe("always-editable sheet", () => {
+    it("passes editable=true to CharacterSheet", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      const sheet = screen.getByTestId("character-sheet");
+      expect(sheet.getAttribute("data-editable")).toBe("true");
+    });
+
+    it("has no Edit toggle button", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      expect(screen.queryByLabelText("Toggle edit mode")).toBeNull();
+    });
+  });
+
+  describe("recalculate button", () => {
+    it("is not visible when character has not been edited", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      expect(screen.queryByRole("button", { name: /recalculate stats/i })).toBeNull();
+    });
+
+    it("appears after character is edited", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      await act(async () => {
+        capturedSheetOnChange!(makeEnrichedCharacter({ name: "Edited Name" }));
+      });
+
+      expect(screen.getByRole("button", { name: /recalculate stats/i })).toBeDefined();
+    });
+
+    it("calls /api/recalculate and hides itself on success", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      await act(async () => {
+        capturedSheetOnChange!(makeEnrichedCharacter({ name: "Edited" }));
+      });
+
+      const recalcResult = makeEnrichedCharacter({ name: "Edited" });
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(recalcResult),
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /recalculate stats/i }));
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByRole("button", { name: /recalculate stats/i })).toBeNull();
+      });
+
+      const recalcCalls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
+        ([url, opts]: [string, RequestInit]) => url === "/api/recalculate" && opts?.method === "POST"
+      );
+      expect(recalcCalls).toHaveLength(1);
     });
   });
 });

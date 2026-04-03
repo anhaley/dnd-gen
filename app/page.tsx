@@ -19,6 +19,7 @@ export default function Home() {
   const isSignedIn = status === "authenticated";
 
   const sheetRef = useRef<HTMLElement>(null);
+  const originalCharacterRef = useRef<string | null>(null);
 
   const [character, setCharacter] = useState<
     SavedCharacter | EnrichedCharacter | null
@@ -30,6 +31,11 @@ export default function Home() {
   const [showSources, setShowSources] = useState(false);
 
   const isUnsaved = character !== null && !("id" in character);
+
+  const isEdited =
+    character !== null &&
+    originalCharacterRef.current !== null &&
+    JSON.stringify(character) !== originalCharacterRef.current;
 
   useEffect(() => {
     if (character && !isLoading) {
@@ -74,6 +80,7 @@ export default function Home() {
 
       const data: EnrichedCharacter = await res.json();
       setCharacter(data);
+      originalCharacterRef.current = JSON.stringify(data);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Something went wrong"
@@ -96,6 +103,7 @@ export default function Home() {
       if (res.ok) {
         const saved: SavedCharacter = await res.json();
         setCharacter(saved);
+        originalCharacterRef.current = JSON.stringify(saved);
         await refreshHistory();
       }
     } catch {}
@@ -103,6 +111,7 @@ export default function Home() {
 
   function handleLoadCharacter(char: SavedCharacter) {
     setCharacter(char);
+    originalCharacterRef.current = JSON.stringify(char);
     setError(null);
     setShowHistory(false);
   }
@@ -113,6 +122,41 @@ export default function Home() {
       await refreshHistory();
       if (character && "id" in character && character.id === id) {
         setCharacter(null);
+        originalCharacterRef.current = null;
+      }
+    } catch {}
+  }
+
+  function handleCharacterEdit(updated: EnrichedCharacter) {
+    if ("id" in character! && "savedAt" in character!) {
+      const saved = character as SavedCharacter;
+      setCharacter({ ...updated, id: saved.id, savedAt: saved.savedAt, userId: saved.userId });
+    } else {
+      setCharacter(updated);
+    }
+  }
+
+  async function handleRecalculate() {
+    if (!character) return;
+
+    try {
+      const res = await fetch("/api/recalculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(character),
+      });
+
+      if (res.ok) {
+        const enriched: EnrichedCharacter = await res.json();
+        if ("id" in character && "savedAt" in character) {
+          const saved = character as SavedCharacter;
+          const updated = { ...enriched, id: saved.id, savedAt: saved.savedAt, userId: saved.userId };
+          setCharacter(updated);
+          originalCharacterRef.current = JSON.stringify(updated);
+        } else {
+          setCharacter(enriched);
+          originalCharacterRef.current = JSON.stringify(enriched);
+        }
       }
     } catch {}
   }
@@ -255,7 +299,11 @@ export default function Home() {
                 ref={sheetRef}
                 className="rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6"
               >
-                <CharacterSheet character={character} />
+                <CharacterSheet
+                  character={character}
+                  editable
+                  onChange={handleCharacterEdit}
+                />
               </section>
 
               {!isSignedIn && (
@@ -273,6 +321,28 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* Floating recalculate button */}
+      {isEdited && (
+        <button
+          onClick={handleRecalculate}
+          className="fixed bottom-6 left-6 z-30 flex items-center gap-2 rounded-full bg-stone-700 px-5 py-3 text-sm font-semibold text-stone-100 shadow-lg shadow-black/40 transition hover:bg-stone-600"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="h-5 w-5"
+          >
+            <path
+              fillRule="evenodd"
+              d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H4.647a.75.75 0 0 0-.75.75v3.585a.75.75 0 0 0 1.5 0v-2.032l.258.254a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39.75.75 0 0 1-.606.316Zm.394-5.839a.75.75 0 0 0-1.5 0v2.032l-.258-.254A7 7 0 0 0 2.236 10.5a.75.75 0 0 0 1.449.39 5.5 5.5 0 0 1 9.201-2.466l.312.311h-2.433a.75.75 0 0 0 0 1.5h3.585a.75.75 0 0 0 .75-.75V5.899l-.394-.314Z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Recalculate stats
+        </button>
+      )}
 
       {/* Floating save button */}
       {isSignedIn && !isLoading && isUnsaved && (
