@@ -24,8 +24,8 @@
 
 ## Up Next
 
-### User accounts and authentication
-Add sign-in so characters are tied to a user. Neon Auth (Better Auth-based, built into the database) or NextAuth.js are leading options.
+### Editable results
+When a character is generated, allow the user to edit the values entered for the various fields in order to customize the result.
 
 ## Backlog
 

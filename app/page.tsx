@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import CharacterForm from "@/components/CharacterForm";
@@ -18,6 +18,8 @@ export default function Home() {
   const { data: session, status } = useSession();
   const isSignedIn = status === "authenticated";
 
+  const sheetRef = useRef<HTMLElement>(null);
+
   const [character, setCharacter] = useState<
     SavedCharacter | EnrichedCharacter | null
   >(null);
@@ -26,6 +28,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showSources, setShowSources] = useState(false);
+
+  const isUnsaved = character !== null && !("id" in character);
+
+  useEffect(() => {
+    if (character && !isLoading) {
+      sheetRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [character, isLoading]);
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -46,52 +56,50 @@ export default function Home() {
     } catch {}
   }
 
-  const handleGenerate = useCallback(
-    async (input: GenerateInput) => {
-      setIsLoading(true);
-      setError(null);
+  const handleGenerate = useCallback(async (input: GenerateInput) => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input),
-        });
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
 
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || `Request failed (${res.status})`);
-        }
-
-        const data: EnrichedCharacter = await res.json();
-
-        if (isSignedIn) {
-          const saveRes = await fetch("/api/characters", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
-
-          if (saveRes.ok) {
-            const saved: SavedCharacter = await saveRes.json();
-            setCharacter(saved);
-            await refreshHistory();
-          } else {
-            setCharacter(data);
-          }
-        } else {
-          setCharacter(data);
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Something went wrong"
-        );
-      } finally {
-        setIsLoading(false);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || `Request failed (${res.status})`);
       }
-    },
-    [isSignedIn]
-  );
+
+      const data: EnrichedCharacter = await res.json();
+      setCharacter(data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Something went wrong"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  async function handleSave() {
+    if (!character) return;
+
+    try {
+      const res = await fetch("/api/characters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(character),
+      });
+
+      if (res.ok) {
+        const saved: SavedCharacter = await res.json();
+        setCharacter(saved);
+        await refreshHistory();
+      }
+    } catch {}
+  }
 
   function handleLoadCharacter(char: SavedCharacter) {
     setCharacter(char);
@@ -243,7 +251,10 @@ export default function Home() {
           {/* Character sheet */}
           {character && !isLoading && (
             <>
-              <section className="rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6">
+              <section
+                ref={sheetRef}
+                className="rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6"
+              >
                 <CharacterSheet character={character} />
               </section>
 
@@ -262,6 +273,24 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* Floating save button */}
+      {isSignedIn && !isLoading && isUnsaved && (
+        <button
+          onClick={handleSave}
+          className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-full bg-amber-700 px-5 py-3 text-sm font-semibold text-stone-100 shadow-lg shadow-black/40 transition hover:bg-amber-600"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="h-5 w-5"
+          >
+            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+          </svg>
+          Save this character
+        </button>
+      )}
     </div>
   );
 }

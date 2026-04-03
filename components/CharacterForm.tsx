@@ -25,6 +25,7 @@ export default function CharacterForm({
   const [subclass, setSubclass] = useState("");
   const [level, setLevel] = useState<number | "">("");
   const [background, setBackground] = useState("");
+  const [loadingSource, setLoadingSource] = useState<"custom" | "random" | null>(null);
 
   const availableVariants = race ? RACE_VARIANTS[race] ?? [] : [];
   const availableSubclasses = charClass ? SUBCLASSES[charClass] ?? [] : [];
@@ -41,6 +42,7 @@ export default function CharacterForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoadingSource("custom");
     onGenerate({
       race: race || undefined,
       raceVariant: raceVariant || undefined,
@@ -53,6 +55,7 @@ export default function CharacterForm({
   }
 
   function handleRandom() {
+    setLoadingSource("random");
     onGenerate({ isRandom: true });
   }
 
@@ -124,7 +127,7 @@ export default function CharacterForm({
           disabled={isLoading}
           className="flex-1 rounded-lg bg-amber-700 px-5 py-2.5 font-semibold text-white transition hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:hover:bg-amber-700"
         >
-          {isLoading ? "Generating..." : "Generate Character"}
+          {isLoading && loadingSource === "custom" ? "Generating..." : "Generate Character"}
         </button>
         <button
           type="button"
@@ -132,7 +135,7 @@ export default function CharacterForm({
           disabled={isLoading}
           className="flex-1 rounded-lg border border-amber-700/50 px-5 py-2.5 font-semibold text-amber-300 transition hover:bg-amber-900/30 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50"
         >
-          {isLoading ? "Generating..." : "Fully Random"}
+          {isLoading && loadingSource === "random" ? "Generating..." : "Fully Random"}
         </button>
       </div>
     </form>
