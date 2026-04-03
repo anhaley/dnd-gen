@@ -29,11 +29,17 @@ vi.mock("@/components/CharacterForm", () => ({
 }));
 
 let capturedSheetOnChange: ((character: EnrichedCharacter) => void) | null = null;
+let capturedOnExport: (() => void) | null = null;
 
 vi.mock("@/components/CharacterSheet", () => ({
-  default: ({ character, editable, onChange }: { character: unknown; editable?: boolean; onChange?: (c: EnrichedCharacter) => void }) => {
+  default: ({ character, editable, onChange, onExport, isExporting }: { character: unknown; editable?: boolean; onChange?: (c: EnrichedCharacter) => void; onExport?: () => void; isExporting?: boolean }) => {
     if (onChange) capturedSheetOnChange = onChange;
-    return <div data-testid="character-sheet" data-name={(character as { name: string }).name} data-editable={editable ?? false} />;
+    if (onExport) capturedOnExport = onExport;
+    return (
+      <div data-testid="character-sheet" data-name={(character as { name: string }).name} data-editable={editable ?? false}>
+        {onExport && <button data-testid="export-btn" data-exporting={isExporting} onClick={onExport}>Export to PDF</button>}
+      </div>
+    );
   },
 }));
 
@@ -116,6 +122,7 @@ beforeEach(() => {
   setSession("unauthenticated");
   capturedOnGenerate = null;
   capturedSheetOnChange = null;
+  capturedOnExport = null;
   globalThis.fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: () => Promise.resolve([]),
@@ -415,6 +422,79 @@ describe("Home page", () => {
         ([url, opts]: [string, RequestInit]) => url === "/api/recalculate" && opts?.method === "POST"
       );
       expect(recalcCalls).toHaveLength(1);
+    });
+  });
+
+  describe("export to PDF", () => {
+    it("shows export button when a character is displayed", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      expect(screen.getByTestId("export-btn")).toBeDefined();
+    });
+
+    it("does not show export button when no character is displayed", () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      expect(screen.queryByTestId("export-btn")).toBeNull();
+    });
+
+    it("shows error when export fails", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      });
+
+      await act(async () => {
+        capturedOnExport!();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/failed to export pdf/i)).toBeDefined();
+      });
+    });
+
+    it("calls /api/export when export button is clicked", async () => {
+      setSession("unauthenticated");
+      render(<Home />);
+
+      await triggerGeneration();
+
+      const fakeBlob = new Blob([new Uint8Array([0x25, 0x50])], {
+        type: "application/pdf",
+      });
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        blob: () => Promise.resolve(fakeBlob),
+        headers: new Headers({
+          "Content-Disposition": 'attachment; filename="Thalindra.pdf"',
+        }),
+      });
+
+      const createObjectURL = vi.fn().mockReturnValue("blob:test");
+      const revokeObjectURL = vi.fn();
+      globalThis.URL.createObjectURL = createObjectURL;
+      globalThis.URL.revokeObjectURL = revokeObjectURL;
+
+      await act(async () => {
+        capturedOnExport!();
+      });
+
+      await waitFor(() => {
+        const exportCalls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
+          ([url, opts]: [string, RequestInit]) =>
+            url === "/api/export" && opts?.method === "POST"
+        );
+        expect(exportCalls).toHaveLength(1);
+      });
     });
   });
 });

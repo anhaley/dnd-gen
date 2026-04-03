@@ -29,6 +29,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showSources, setShowSources] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const isUnsaved = character !== null && !("id" in character);
 
@@ -133,6 +134,38 @@ export default function Home() {
       setCharacter({ ...updated, id: saved.id, savedAt: saved.savedAt, userId: saved.userId });
     } else {
       setCharacter(updated);
+    }
+  }
+
+  async function handleExport() {
+    if (!character) return;
+    setIsExporting(true);
+
+    try {
+      const res = await fetch("/api/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(character),
+      });
+
+      if (!res.ok) throw new Error("Export failed");
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download =
+        res.headers
+          .get("Content-Disposition")
+          ?.match(/filename="(.+)"/)?.[1] ?? "character.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Failed to export PDF");
+    } finally {
+      setIsExporting(false);
     }
   }
 
@@ -303,6 +336,8 @@ export default function Home() {
                   character={character}
                   editable
                   onChange={handleCharacterEdit}
+                  onExport={handleExport}
+                  isExporting={isExporting}
                 />
               </section>
 

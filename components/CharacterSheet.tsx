@@ -14,6 +14,8 @@ interface CharacterSheetProps {
   character: EnrichedCharacter;
   editable?: boolean;
   onChange?: (character: EnrichedCharacter) => void;
+  onExport?: () => void;
+  isExporting?: boolean;
 }
 
 function abilityModifier(score: number): string {
@@ -31,6 +33,8 @@ export default function CharacterSheet({
   character,
   editable = false,
   onChange,
+  onExport,
+  isExporting = false,
 }: CharacterSheetProps) {
   function update(patch: Partial<EnrichedCharacter>) {
     onChange?.({ ...character, ...patch });
@@ -72,6 +76,26 @@ export default function CharacterSheet({
     <div className="space-y-6">
       {/* Header */}
       <div className="border-b border-amber-900/30 pb-4">
+        {onExport && (
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={onExport}
+              disabled={isExporting}
+              className="flex items-center gap-1.5 rounded-md border border-amber-900/30 px-3 py-1.5 text-sm text-stone-400 transition hover:border-amber-700/40 hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="h-4 w-4"
+              >
+                <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+                <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+              </svg>
+              {isExporting ? "Exporting..." : "Export to PDF"}
+            </button>
+          </div>
+        )}
         {editable ? (
           <div className="space-y-2">
             <EditableText

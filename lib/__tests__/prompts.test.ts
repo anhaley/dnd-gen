@@ -27,6 +27,16 @@ describe("SYSTEM_PROMPT", () => {
     expect(SYSTEM_PROMPT).toContain("speed");
     expect(SYSTEM_PROMPT).toContain("no flavor text");
   });
+
+  it("instructs savingThrows format with full capitalized names", () => {
+    expect(SYSTEM_PROMPT).toContain("savingThrows");
+    expect(SYSTEM_PROMPT).toContain("full capitalized ability names");
+  });
+
+  it("instructs skills format with title-case names", () => {
+    expect(SYSTEM_PROMPT).toContain("skills");
+    expect(SYSTEM_PROMPT).toContain("title-case");
+  });
 });
 
 describe("buildUserPrompt", () => {

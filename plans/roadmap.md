@@ -24,16 +24,16 @@
 
 ## Up Next
 
-### Editable results
-When a character is generated, allow the user to edit the values entered for the various fields in order to customize the result.
+### Classic output formatting
+Make the generated form look like the WotC character sheet
 
 ## Backlog
 
-### PDF export
-Export characters to PDF via `pdf-lib` using the official WotC form-fillable character sheet. Server-side generation, form stays editable.
+### Dynamic feedback
+Allow the user to chat with an agent about how to tweak the generated character. E.g., "give him a darker backstory" or "I want him to use a crossbow" or "give him inventory items consistent with a Harper working undercover as a blacksmith"
 
-### Multiple PDF templates
-Custom-designed PDF templates beyond the official WotC sheet.
+### Magic items
+Allow higher-level characters to have magic items in line with the scaling expectations of the system.
 
 ### Character image generation
 Generate character portraits via DALL-E or similar image model.

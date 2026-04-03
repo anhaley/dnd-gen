@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { enrichCharacter } from "../combat";
+import {
+  enrichCharacter,
+  normalizeSavingThrows,
+  normalizeSkills,
+} from "../combat";
 import type { Character } from "../schemas";
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
@@ -338,5 +342,74 @@ describe("enrichCharacter", () => {
       const { weapons: _w, ...originalWithoutWeapons } = char;
       expect(result).toMatchObject(originalWithoutWeapons);
     });
+  });
+
+  describe("normalization", () => {
+    it("normalizes saving throws from enrichCharacter", () => {
+      const char = makeCharacter({ savingThrows: ["dex", "int"] });
+      const result = enrichCharacter(char);
+      expect(result.savingThrows).toEqual(["Dexterity", "Intelligence"]);
+    });
+
+    it("normalizes skills from enrichCharacter", () => {
+      const char = makeCharacter({
+        skills: ["sleight of hand", "stealth", "arcana"],
+      });
+      const result = enrichCharacter(char);
+      expect(result.skills).toEqual([
+        "Sleight of Hand",
+        "Stealth",
+        "Arcana",
+      ]);
+    });
+  });
+});
+
+describe("normalizeSavingThrows", () => {
+  it("converts lowercase abbreviations to full names", () => {
+    expect(normalizeSavingThrows(["str", "dex", "con", "int", "wis", "cha"]))
+      .toEqual(["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]);
+  });
+
+  it("converts lowercase full names to title case", () => {
+    expect(normalizeSavingThrows(["strength", "dexterity"]))
+      .toEqual(["Strength", "Dexterity"]);
+  });
+
+  it("preserves already-correct full names", () => {
+    expect(normalizeSavingThrows(["Strength", "Constitution"]))
+      .toEqual(["Strength", "Constitution"]);
+  });
+
+  it("passes through unrecognized values unchanged", () => {
+    expect(normalizeSavingThrows(["Luck"])).toEqual(["Luck"]);
+  });
+
+  it("trims whitespace", () => {
+    expect(normalizeSavingThrows(["  dex  ", " Wisdom "])).toEqual([
+      "Dexterity",
+      "Wisdom",
+    ]);
+  });
+});
+
+describe("normalizeSkills", () => {
+  it("converts all-lowercase to title case", () => {
+    expect(normalizeSkills(["acrobatics", "animal handling", "sleight of hand"]))
+      .toEqual(["Acrobatics", "Animal Handling", "Sleight of Hand"]);
+  });
+
+  it("preserves already-correct title case", () => {
+    expect(normalizeSkills(["Arcana", "Stealth"]))
+      .toEqual(["Arcana", "Stealth"]);
+  });
+
+  it("handles mixed case", () => {
+    expect(normalizeSkills(["PERCEPTION", "History"]))
+      .toEqual(["Perception", "History"]);
+  });
+
+  it("passes through unrecognized values unchanged", () => {
+    expect(normalizeSkills(["Basket Weaving"])).toEqual(["Basket Weaving"]);
   });
 });

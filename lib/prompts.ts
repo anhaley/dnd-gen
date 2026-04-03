@@ -6,6 +6,8 @@ Rules:
 - Ability scores: point-buy/standard-array range (8-16 before racials, max 20 after).
 - HP: max hit die + CON mod at level 1, average + CON mod thereafter.
 - Proficiencies, saving throws, skills must follow class/background/race rules exactly.
+- savingThrows: use full capitalized ability names, e.g. ["Dexterity", "Intelligence"].
+- skills: use standard title-case names, e.g. ["Sleight of Hand", "Arcana", "Animal Handling"].
 - Features: all racial + class features for the given level.
 - Spellcasting: include spells with name and level (0=cantrip). spellSlots: array of {level, slots} per slot level. Warlocks use Pact Magic (all slots at one level). Non-casters: set spells and spellSlots to null.
 - Armor Class: compute armorClass using 5E rules. Set armorClassBreakdown to a short formula showing the derivation, e.g. "Plate (18) + Shield (+2)" or "Unarmored Defense: 10 + DEX (+3) + WIS (+2)" or "Mage Armor: 13 + DEX (+2)". Include every contributing component.

@@ -11,6 +11,50 @@ import type {
 
 type AbilityKey = keyof AbilityScores;
 
+const CANONICAL_SAVES: Record<string, string> = {
+  str: "Strength",
+  strength: "Strength",
+  dex: "Dexterity",
+  dexterity: "Dexterity",
+  con: "Constitution",
+  constitution: "Constitution",
+  int: "Intelligence",
+  intelligence: "Intelligence",
+  wis: "Wisdom",
+  wisdom: "Wisdom",
+  cha: "Charisma",
+  charisma: "Charisma",
+};
+
+const CANONICAL_SKILLS: Record<string, string> = {
+  acrobatics: "Acrobatics",
+  "animal handling": "Animal Handling",
+  arcana: "Arcana",
+  athletics: "Athletics",
+  deception: "Deception",
+  history: "History",
+  insight: "Insight",
+  intimidation: "Intimidation",
+  investigation: "Investigation",
+  medicine: "Medicine",
+  nature: "Nature",
+  perception: "Perception",
+  performance: "Performance",
+  persuasion: "Persuasion",
+  religion: "Religion",
+  "sleight of hand": "Sleight of Hand",
+  stealth: "Stealth",
+  survival: "Survival",
+};
+
+export function normalizeSavingThrows(saves: string[]): string[] {
+  return saves.map((s) => CANONICAL_SAVES[s.toLowerCase().trim()] ?? s);
+}
+
+export function normalizeSkills(skills: string[]): string[] {
+  return skills.map((s) => CANONICAL_SKILLS[s.toLowerCase().trim()] ?? s);
+}
+
 const RANGED_WEAPONS = new Set([
   "longbow",
   "shortbow",
@@ -94,6 +138,12 @@ function getSpellcastingAbility(
 }
 
 export function enrichCharacter(character: Character): EnrichedCharacter {
+  character = {
+    ...character,
+    savingThrows: normalizeSavingThrows(character.savingThrows),
+    skills: normalizeSkills(character.skills),
+  };
+
   const { proficiencyBonus, abilityScores } = character;
 
   const castingAbility = getSpellcastingAbility(
