@@ -1,6 +1,39 @@
 import { describe, it, expect } from "vitest";
-import { characters } from "../db/schema";
+import { characters, users } from "../db/schema";
 import { getTableColumns } from "drizzle-orm";
+
+describe("users table schema", () => {
+  const columns = getTableColumns(users);
+
+  it("has all expected columns", () => {
+    for (const col of ["id", "email", "passwordHash", "name", "createdAt"]) {
+      expect(columns, `Missing column: ${col}`).toHaveProperty(col);
+    }
+  });
+
+  it("has UUID id column with a default value", () => {
+    expect(columns.id.columnType).toBe("PgUUID");
+    expect(columns.id.hasDefault).toBe(true);
+  });
+
+  it("marks email and passwordHash as not-null", () => {
+    expect(columns.email.notNull).toBe(true);
+    expect(columns.passwordHash.notNull).toBe(true);
+  });
+
+  it("marks name as nullable", () => {
+    expect(columns.name.notNull).toBe(false);
+  });
+
+  it("has a createdAt timestamp with default", () => {
+    expect(columns.createdAt.hasDefault).toBe(true);
+    expect(columns.createdAt.notNull).toBe(true);
+  });
+
+  it("has exactly 5 columns", () => {
+    expect(Object.keys(columns)).toHaveLength(5);
+  });
+});
 
 describe("characters table schema", () => {
   const columns = getTableColumns(characters);
@@ -61,6 +94,7 @@ describe("characters table schema", () => {
   });
 
   it("marks nullable columns correctly", () => {
+    expect(columns.userId.notNull).toBe(false);
     expect(columns.raceVariant.notNull).toBe(false);
     expect(columns.spellAttackBonus.notNull).toBe(false);
     expect(columns.spellSaveDC.notNull).toBe(false);
@@ -99,7 +133,7 @@ describe("characters table schema", () => {
     }
   });
 
-  it("has exactly 28 columns", () => {
-    expect(Object.keys(columns)).toHaveLength(28);
+  it("has exactly 29 columns", () => {
+    expect(Object.keys(columns)).toHaveLength(29);
   });
 });

@@ -11,6 +11,7 @@ Rules:
 - Armor Class: compute armorClass using 5E rules. Set armorClassBreakdown to a short formula showing the derivation, e.g. "Plate (18) + Shield (+2)" or "Unarmored Defense: 10 + DEX (+3) + WIS (+2)" or "Mage Armor: 13 + DEX (+2)". Include every contributing component.
 - Weapons: list in weapons array with name, damage die (e.g. "1d8"), damageType (e.g. "slashing"), and properties (e.g. ["finesse","light"]). Use standard 5E property names: finesse, heavy, light, loading, range, reach, thrown, two-handed, versatile, ammunition. Non-weapon equipment goes in equipment. Non-martial characters: set weapons to null.
 - race = base race (e.g. "Elf"), raceVariant = subrace (e.g. "High Elf") or null.
+- speed: plain English, e.g. "30 ft." or "25 ft." — no flavor text, no non-English characters.
 - backstory: 2-3 sentences tying race, class, background, and traits.`;
 
 export function buildUserPrompt(input: GenerateInput): string {

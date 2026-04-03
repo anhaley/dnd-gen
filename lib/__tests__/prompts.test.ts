@@ -22,6 +22,11 @@ describe("SYSTEM_PROMPT", () => {
     expect(SYSTEM_PROMPT).toContain("spellSlots");
     expect(SYSTEM_PROMPT).toContain("Pact Magic");
   });
+
+  it("instructs plain English speed format", () => {
+    expect(SYSTEM_PROMPT).toContain("speed");
+    expect(SYSTEM_PROMPT).toContain("no flavor text");
+  });
 });
 
 describe("buildUserPrompt", () => {

@@ -1,15 +1,26 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 import CharacterForm from "@/components/CharacterForm";
 import CharacterSheet from "@/components/CharacterSheet";
 import CharacterHistory from "@/components/CharacterHistory";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import SourcesModal from "@/components/SourcesModal";
-import { EnrichedCharacter, GenerateInput, SavedCharacter } from "@/lib/schemas";
+import {
+  EnrichedCharacter,
+  GenerateInput,
+  SavedCharacter,
+} from "@/lib/schemas";
 
 export default function Home() {
-  const [character, setCharacter] = useState<SavedCharacter | null>(null);
+  const { data: session, status } = useSession();
+  const isSignedIn = status === "authenticated";
+
+  const [character, setCharacter] = useState<
+    SavedCharacter | EnrichedCharacter | null
+  >(null);
   const [savedCharacters, setSavedCharacters] = useState<SavedCharacter[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,58 +28,70 @@ export default function Home() {
   const [showSources, setShowSources] = useState(false);
 
   useEffect(() => {
+    if (!isSignedIn) {
+      setSavedCharacters([]);
+      return;
+    }
     fetch("/api/characters")
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : []))
       .then((data) => setSavedCharacters(data))
       .catch(() => {});
-  }, []);
+  }, [isSignedIn]);
 
   async function refreshHistory() {
+    if (!isSignedIn) return;
     try {
       const res = await fetch("/api/characters");
       if (res.ok) setSavedCharacters(await res.json());
     } catch {}
   }
 
-  const handleGenerate = useCallback(async (input: GenerateInput) => {
-    setIsLoading(true);
-    setError(null);
+  const handleGenerate = useCallback(
+    async (input: GenerateInput) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || `Request failed (${res.status})`);
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || `Request failed (${res.status})`);
+        }
+
+        const data: EnrichedCharacter = await res.json();
+
+        if (isSignedIn) {
+          const saveRes = await fetch("/api/characters", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          if (saveRes.ok) {
+            const saved: SavedCharacter = await saveRes.json();
+            setCharacter(saved);
+            await refreshHistory();
+          } else {
+            setCharacter(data);
+          }
+        } else {
+          setCharacter(data);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Something went wrong"
+        );
+      } finally {
+        setIsLoading(false);
       }
-
-      const data: EnrichedCharacter = await res.json();
-
-      const saveRes = await fetch("/api/characters", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!saveRes.ok) {
-        throw new Error("Failed to save character");
-      }
-
-      const saved: SavedCharacter = await saveRes.json();
-      setCharacter(saved);
-      await refreshHistory();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [isSignedIn]
+  );
 
   function handleLoadCharacter(char: SavedCharacter) {
     setCharacter(char);
@@ -80,7 +103,7 @@ export default function Home() {
     try {
       await fetch(`/api/characters/${id}`, { method: "DELETE" });
       await refreshHistory();
-      if (character?.id === id) {
+      if (character && "id" in character && character.id === id) {
         setCharacter(null);
       }
     } catch {}
@@ -88,54 +111,58 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Mobile history toggle */}
-      <button
-        onClick={() => setShowHistory(!showHistory)}
-        className="fixed top-4 left-4 z-30 rounded-lg border border-amber-900/30 bg-stone-900/90 p-2 text-amber-400 backdrop-blur-sm transition hover:bg-stone-800 lg:hidden"
-        aria-label="Toggle history"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="h-5 w-5"
+      {/* Mobile history toggle — only when signed in */}
+      {isSignedIn && (
+        <button
+          onClick={() => setShowHistory(!showHistory)}
+          className="fixed top-4 left-4 z-30 rounded-lg border border-amber-900/30 bg-stone-900/90 p-2 text-amber-400 backdrop-blur-sm transition hover:bg-stone-800 lg:hidden"
+          aria-label="Toggle history"
         >
-          <path
-            fillRule="evenodd"
-            d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-
-      {/* History sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-20 w-72 transform border-r border-amber-900/20 bg-stone-950/95 backdrop-blur-sm transition-transform duration-200 lg:relative lg:translate-x-0 ${
-          showHistory ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-amber-900/20 px-4 py-4">
-            <h2 className="font-serif text-lg font-semibold text-amber-200">
-              History
-            </h2>
-            <span className="text-xs text-stone-500">
-              {savedCharacters.length} saved
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2">
-            <CharacterHistory
-              characters={savedCharacters}
-              onLoad={handleLoadCharacter}
-              onDelete={handleDeleteCharacter}
-              activeId={character?.id}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="h-5 w-5"
+          >
+            <path
+              fillRule="evenodd"
+              d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z"
+              clipRule="evenodd"
             />
+          </svg>
+        </button>
+      )}
+
+      {/* History sidebar — only when signed in */}
+      {isSignedIn && (
+        <aside
+          className={`fixed inset-y-0 left-0 z-20 w-72 transform border-r border-amber-900/20 bg-stone-950/95 backdrop-blur-sm transition-transform duration-200 lg:relative lg:translate-x-0 ${
+            showHistory ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between border-b border-amber-900/20 px-4 py-4">
+              <h2 className="font-serif text-lg font-semibold text-amber-200">
+                History
+              </h2>
+              <span className="text-xs text-stone-500">
+                {savedCharacters.length} saved
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              <CharacterHistory
+                characters={savedCharacters}
+                onLoad={handleLoadCharacter}
+                onDelete={handleDeleteCharacter}
+                activeId={character && "id" in character ? character.id : undefined}
+              />
+            </div>
           </div>
-        </div>
-      </aside>
+        </aside>
+      )}
 
       {/* Overlay for mobile sidebar */}
-      {showHistory && (
+      {isSignedIn && showHistory && (
         <div
           className="fixed inset-0 z-10 bg-black/50 lg:hidden"
           onClick={() => setShowHistory(false)}
@@ -145,6 +172,30 @@ export default function Home() {
       {/* Main content */}
       <main className="flex-1 px-4 py-8 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-3xl">
+          {/* Auth header */}
+          <div className="mb-4 flex justify-end gap-3 text-sm">
+            {isSignedIn ? (
+              <>
+                <span className="text-stone-400">{session.user?.email}</span>
+                <button
+                  onClick={() => signOut()}
+                  className="text-amber-400 transition hover:text-amber-300"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              status !== "loading" && (
+                <Link
+                  href="/signin"
+                  className="text-amber-400 transition hover:text-amber-300"
+                >
+                  Sign in
+                </Link>
+              )
+            )}
+          </div>
+
           {/* Title */}
           <header className="mb-8 text-center">
             <h1 className="font-serif text-4xl font-bold tracking-tight text-amber-100 sm:text-5xl">
@@ -191,9 +242,23 @@ export default function Home() {
 
           {/* Character sheet */}
           {character && !isLoading && (
-            <section className="rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6">
-              <CharacterSheet character={character} />
-            </section>
+            <>
+              <section className="rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6">
+                <CharacterSheet character={character} />
+              </section>
+
+              {!isSignedIn && (
+                <p className="mt-4 text-center text-sm text-stone-500">
+                  <Link
+                    href="/signin"
+                    className="text-amber-400 hover:text-amber-300"
+                  >
+                    Sign in
+                  </Link>{" "}
+                  to save characters and build your collection.
+                </p>
+              )}
+            </>
           )}
         </div>
       </main>

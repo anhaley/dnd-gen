@@ -5,11 +5,27 @@ import {
   integer,
   timestamp,
   jsonb,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
+
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    passwordHash: text("password_hash").notNull(),
+    name: text("name"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [uniqueIndex("users_email_idx").on(table.email)]
+);
 
 export const characters = pgTable("characters", {
   id: uuid("id").primaryKey().defaultRandom(),
   savedAt: timestamp("saved_at", { withTimezone: true }).notNull().defaultNow(),
+  userId: uuid("user_id").references(() => users.id),
 
   name: text("name").notNull(),
   race: text("race").notNull(),

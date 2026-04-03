@@ -5,6 +5,7 @@ function makeRow(overrides: Record<string, unknown> = {}) {
   return {
     id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     savedAt: new Date("2025-06-15T12:00:00Z"),
+    userId: "user-uuid-1234",
     name: "Thalindra",
     race: "Elf",
     raceVariant: "High Elf",
@@ -140,6 +141,7 @@ describe("rowToSavedCharacter", () => {
       "spells",
       "subclass",
       "traits",
+      "userId",
       "weapons",
     ];
     expect(keys).toEqual(expected);

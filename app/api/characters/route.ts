@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { desc } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { characters } from "@/lib/db/schema";
 import { rowToSavedCharacter } from "@/lib/db/mappers";
@@ -7,10 +8,16 @@ import type { EnrichedCharacter } from "@/lib/schemas";
 
 export async function GET() {
   try {
-    console.log("[characters] GET /api/characters");
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log("[characters] GET /api/characters user=%s", session.user.id);
     const rows = await db
       .select()
       .from(characters)
+      .where(eq(characters.userId, session.user.id))
       .orderBy(desc(characters.savedAt));
 
     console.log("[characters] Returning %d characters", rows.length);
@@ -26,12 +33,18 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    console.log("[characters] POST /api/characters");
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log("[characters] POST /api/characters user=%s", session.user.id);
     const body: EnrichedCharacter = await request.json();
 
     const [row] = await db
       .insert(characters)
       .values({
+        userId: session.user.id,
         name: body.name,
         race: body.race,
         raceVariant: body.raceVariant,

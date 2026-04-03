@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { characters } from "@/lib/db/schema";
 
@@ -8,9 +9,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
-    console.log("[characters] DELETE /api/characters/%s", id);
-    await db.delete(characters).where(eq(characters.id, id));
+    console.log("[characters] DELETE /api/characters/%s user=%s", id, session.user.id);
+    await db
+      .delete(characters)
+      .where(and(eq(characters.id, id), eq(characters.userId, session.user.id)));
     console.log("[characters] Deleted character id=%s", id);
     return NextResponse.json({ ok: true });
   } catch (err) {

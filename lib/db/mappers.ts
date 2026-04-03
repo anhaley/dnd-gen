@@ -7,6 +7,7 @@ export function rowToSavedCharacter(row: CharacterRow): SavedCharacter {
   return {
     id: row.id,
     savedAt: new Date(row.savedAt).getTime(),
+    userId: row.userId,
     name: row.name,
     race: row.race,
     raceVariant: row.raceVariant,

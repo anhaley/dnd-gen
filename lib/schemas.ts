@@ -87,4 +87,5 @@ export type GenerateInput = z.infer<typeof GenerateInputSchema>;
 export interface SavedCharacter extends EnrichedCharacter {
   id: string;
   savedAt: number;
+  userId: string | null;
 }

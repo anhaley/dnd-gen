@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+const mockAuth = vi.fn();
+
+vi.mock("@/auth", () => ({
+  auth: () => mockAuth(),
+}));
+
 const mockSelectOrderBy = vi.fn();
-const mockSelectFrom = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
+const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
+const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
 const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 
 const mockInsertReturning = vi.fn();
@@ -20,10 +27,11 @@ vi.mock("@/lib/db", () => ({
 }));
 
 vi.mock("@/lib/db/schema", () => ({
-  characters: { savedAt: Symbol("savedAt"), id: Symbol("id") },
+  characters: { savedAt: Symbol("savedAt"), id: Symbol("id"), userId: Symbol("userId") },
 }));
 
 vi.mock("drizzle-orm", () => ({
+  and: vi.fn((...args: unknown[]) => args),
   desc: vi.fn((col: unknown) => col),
   eq: vi.fn((col: unknown, val: unknown) => ({ col, val })),
 }));
@@ -31,10 +39,14 @@ vi.mock("drizzle-orm", () => ({
 import { GET, POST } from "@/app/api/characters/route";
 import { DELETE } from "@/app/api/characters/[id]/route";
 
+const TEST_USER_ID = "user-uuid-1234";
+const AUTHED_SESSION = { user: { id: TEST_USER_ID, email: "test@example.com" } };
+
 function makeDbRow(overrides: Record<string, unknown> = {}) {
   return {
     id: "abc-123",
     savedAt: new Date("2025-06-15T12:00:00Z"),
+    userId: TEST_USER_ID,
     name: "Thalindra",
     race: "Elf",
     raceVariant: "High Elf",
@@ -72,10 +84,11 @@ function makeDbRow(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockAuth.mockResolvedValue(AUTHED_SESSION);
 });
 
 describe("GET /api/characters", () => {
-  it("returns mapped characters on success", async () => {
+  it("returns mapped characters for the authenticated user", async () => {
     const rows = [makeDbRow(), makeDbRow({ id: "def-456", name: "Grog" })];
     mockSelectOrderBy.mockResolvedValue(rows);
 
@@ -106,6 +119,16 @@ describe("GET /api/characters", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual([]);
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body).toMatchObject({ error: "Unauthorized" });
   });
 
   it("returns 500 on database error", async () => {
@@ -179,20 +202,24 @@ describe("POST /api/characters", () => {
     expect(typeof body.savedAt).toBe("number");
   });
 
-  it("passes all fields to the database insert", async () => {
+  it("attaches the session userId on insert", async () => {
     mockInsertReturning.mockResolvedValue([makeDbRow()]);
 
     await POST(makePostRequest());
 
     expect(mockInsertValues).toHaveBeenCalledTimes(1);
     const inserted = mockInsertValues.mock.calls[0][0];
-    expect(inserted).toMatchObject({
-      name: "Thalindra",
-      race: "Elf",
-      raceVariant: "High Elf",
-      class: "Wizard",
-      level: 5,
-    });
+    expect(inserted.userId).toBe(TEST_USER_ID);
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const response = await POST(makePostRequest());
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body).toMatchObject({ error: "Unauthorized" });
   });
 
   it("returns 500 on database error", async () => {
@@ -234,6 +261,17 @@ describe("DELETE /api/characters/[id]", () => {
     await DELETE(request, params);
 
     expect(mockDeleteWhere).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    mockAuth.mockResolvedValue(null);
+    const { request, params } = makeDeleteRequest("abc-123");
+
+    const response = await DELETE(request, params);
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body).toMatchObject({ error: "Unauthorized" });
   });
 
   it("returns 500 on database error", async () => {
