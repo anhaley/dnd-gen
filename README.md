@@ -10,15 +10,19 @@ Generate D&D 5th Edition characters and NPCs instantly using AI. Configure race,
    npm install
    ```
 
-2. **Add your OpenAI API key:**
+2. **Environment variables:**
 
-   Copy `.env.example` to `.env.local` and replace the placeholder with your key:
+   Copy `.env.example` to `.env.local` and fill in values:
 
    ```bash
    cp .env.example .env.local
    ```
 
-   Get an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
+   | Variable | Purpose |
+   |----------|---------|
+   | `OPENAI_API_KEY` | Required for `/api/generate`. [Get a key](https://platform.openai.com/api-keys). |
+   | `DATABASE_URL` | Postgres (e.g. Neon) — required for saving characters when signed in. |
+   | `AUTH_SECRET` | Secret for NextAuth session signing — use `openssl rand -base64 32`. |
 
 3. **Run the dev server:**
 
@@ -33,8 +37,17 @@ Generate D&D 5th Edition characters and NPCs instantly using AI. Configure race,
 - **Next.js** (App Router) — React frontend + API routes
 - **TypeScript** — type-safe character schema
 - **Tailwind CSS** — dark fantasy-themed UI
-- **OpenAI API** (`gpt-4o-mini`) — AI-powered character generation
-- **Zod** — runtime schema validation
+- **OpenAI API** — character generation uses **`gpt-4o`** for level 12+ and when level is unspecified (e.g. random); **`gpt-4o-mini`** for levels 1–11 when level is set
+- **Zod** — runtime schema validation (including structured output from the API)
+- **NextAuth** — sign-in for cloud character storage
+- **Drizzle ORM** + **Neon** (Postgres) — persisted characters per user
+- **pdf-lib** — server-side PDF export (official WotC form-fillable character sheet template)
+
+## Tests
+
+```bash
+npm test
+```
 
 ## Included Sourcebooks
 
@@ -53,7 +66,7 @@ Races, classes, subclasses, and backgrounds are drawn from:
 ## How It Works
 
 1. Pick your constraints (race, race variant, class, subclass, level, background) or hit **Fully Random**.
-2. The app sends your choices to a Next.js API route, which calls the OpenAI API with a structured prompt.
-3. The AI returns a complete character as JSON, validated against a strict Zod schema.
-4. The character is displayed and automatically saved to your browser's localStorage.
-5. Load or delete past characters from the history sidebar.
+2. The app sends your choices to a Next.js API route, which calls the OpenAI API with a structured system prompt (including spell-count hints when class/level allow it).
+3. The AI returns a complete character as JSON, validated against a strict Zod schema, then enriched (e.g. weapon bonuses, spell DCs).
+4. The character is shown on an editable sheet. **Export to PDF** fills the bundled WotC-style form-fillable sheet server-side.
+5. **Signed-in users:** characters are saved to the database and listed in the **History** sidebar. **Anonymous users:** generation works; persistence is session-only (no cloud save).
