@@ -3,11 +3,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockSelectLimit = vi.fn();
 const mockSelectWhere = vi.fn(() => ({ limit: mockSelectLimit }));
 const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
-const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+const mockSelect = vi.fn((...args: unknown[]) => {
+  void args;
+  return { from: mockSelectFrom };
+});
 
 const mockInsertReturning = vi.fn();
-const mockInsertValues = vi.fn(() => ({ returning: mockInsertReturning }));
-const mockInsert = vi.fn(() => ({ values: mockInsertValues }));
+const mockInsertValues = vi.fn((values: unknown) => {
+  void values;
+  return { returning: mockInsertReturning };
+});
+const mockInsert = vi.fn((...args: unknown[]) => {
+  void args;
+  return { values: mockInsertValues };
+});
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -124,14 +133,14 @@ describe("POST /api/auth/signup", () => {
   it("accepts an optional name field", async () => {
     await POST(makeRequest({ name: "Gandalf the Grey" }));
 
-    const insertedValues = mockInsertValues.mock.calls[0][0];
+    const insertedValues = mockInsertValues.mock.calls[0][0] as { name: string | null };
     expect(insertedValues.name).toBe("Gandalf the Grey");
   });
 
   it("sets name to null when not provided", async () => {
     await POST(makeRequest());
 
-    const insertedValues = mockInsertValues.mock.calls[0][0];
+    const insertedValues = mockInsertValues.mock.calls[0][0] as { name: string | null };
     expect(insertedValues.name).toBeNull();
   });
 });

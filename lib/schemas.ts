@@ -23,6 +23,14 @@ export const WeaponSchema = z.object({
   properties: z.array(z.string()),
 });
 
+/** Feature or equipment line: display name plus terse mechanical summary. */
+export const NamedSummarySchema = z.object({
+  name: z.string(),
+  summary: z.string().max(280),
+});
+
+export type NamedSummary = z.infer<typeof NamedSummarySchema>;
+
 export const CharacterSchema = z.object({
   name: z.string(),
   race: z.string(),
@@ -42,8 +50,8 @@ export const CharacterSchema = z.object({
   skills: z.array(z.string()),
   proficiencies: z.array(z.string()),
   weapons: z.array(WeaponSchema).nullable(),
-  equipment: z.array(z.string()),
-  features: z.array(z.string()),
+  equipment: z.array(NamedSummarySchema),
+  features: z.array(NamedSummarySchema),
   spellSlots: z
     .array(z.object({ level: z.number(), slots: z.number() }))
     .nullable(),

@@ -53,8 +53,15 @@ function makeCharacter(
         damageBonus: -1,
       },
     ],
-    equipment: ["Scholar's pack", "Spellbook", "Component pouch"],
-    features: ["Arcane Recovery", "Sculpt Spells"],
+    equipment: [
+      { name: "Scholar's pack", summary: "" },
+      { name: "Spellbook", summary: "" },
+      { name: "Component pouch", summary: "" },
+    ],
+    features: [
+      { name: "Arcane Recovery", summary: "" },
+      { name: "Sculpt Spells", summary: "" },
+    ],
     spellSlots: [
       { level: 1, slots: 4 },
       { level: 2, slots: 3 },
@@ -327,6 +334,25 @@ describe("fillCharacterSheet", () => {
     );
   });
 
+  it("includes summary after name when summary is non-empty", async () => {
+    const bytes = await fillCharacterSheet(
+      makeCharacter({
+        features: [
+          { name: "Arcane Recovery", summary: "1/day: recover spell slots" },
+          { name: "Sculpt Spells", summary: "allies in area save for half" },
+        ],
+        equipment: [{ name: "Cloak of Protection", summary: "+1 AC; attune" }],
+      })
+    );
+
+    expect(await getFormFieldValue(bytes, "Features and Traits")).toBe(
+      "Arcane Recovery: 1/day: recover spell slots\nSculpt Spells: allies in area save for half"
+    );
+    expect(await getFormFieldValue(bytes, "Equipment")).toBe(
+      "Cloak of Protection: +1 AC; attune"
+    );
+  });
+
   it("fills AC, Initiative, and ProficienciesLang with explicit font sizes", async () => {
     const bytes = await fillCharacterSheet(
       makeCharacter({
@@ -372,8 +398,8 @@ describe("fillCharacterSheet", () => {
       weapons: [
         { name: "Dagger", damage: "1d4", damageType: "piercing", properties: ["finesse"] },
       ],
-      equipment: ["Spellbook"],
-      features: ["Arcane Recovery"],
+      equipment: [{ name: "Spellbook", summary: "" }],
+      features: [{ name: "Arcane Recovery", summary: "" }],
       spellSlots: [{ level: 1, slots: 2 }],
       spells: [
         { name: "Fire Bolt", level: 0 },

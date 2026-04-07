@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import CharacterSheet from "@/components/CharacterSheet";
 import type { EnrichedCharacter } from "@/lib/schemas";
@@ -29,8 +29,8 @@ function makeCharacter(
     skills: ["Arcana", "History"],
     proficiencies: ["Daggers"],
     weapons: null,
-    equipment: ["Scholar's pack"],
-    features: ["Arcane Recovery"],
+    equipment: [{ name: "Scholar's pack", summary: "" }],
+    features: [{ name: "Arcane Recovery", summary: "" }],
     spellSlots: [{ level: 1, slots: 4 }],
     spells: [{ name: "Fire Bolt", level: 0 }],
     traits: {

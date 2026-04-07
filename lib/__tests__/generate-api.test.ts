@@ -56,8 +56,12 @@ function makeCharacterData(overrides: Record<string, unknown> = {}) {
     weapons: [
       { name: "Greataxe", damage: "1d12", damageType: "slashing", properties: ["heavy", "two-handed"] },
     ],
-    equipment: ["Explorer's pack"],
-    features: ["Rage", "Reckless Attack", "Extra Attack"],
+    equipment: [{ name: "Explorer's pack", summary: "" }],
+    features: [
+      { name: "Rage", summary: "" },
+      { name: "Reckless Attack", summary: "" },
+      { name: "Extra Attack", summary: "" },
+    ],
     spellSlots: null,
     spells: null,
     traits: {

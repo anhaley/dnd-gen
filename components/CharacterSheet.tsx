@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { EnrichedCharacter, EnrichedWeapon, AbilityScores } from "@/lib/schemas";
+import {
+  EnrichedCharacter,
+  EnrichedWeapon,
+  AbilityScores,
+  NamedSummary,
+} from "@/lib/schemas";
 import { RACE_VARIANTS } from "@/lib/dnd-data";
 import {
   EditableText,
   EditableNumber,
   EditableTextarea,
   EditableList,
+  EditableNamedSummaryList,
 } from "./EditableField";
 
 interface CharacterSheetProps {
@@ -268,7 +274,7 @@ export default function CharacterSheet({
       />
 
       {/* Features */}
-      <ListSection
+      <NamedSummarySection
         title="Features"
         items={character.features}
         editable={editable}
@@ -300,7 +306,7 @@ export default function CharacterSheet({
       )}
 
       {/* Equipment */}
-      <ListSection
+      <NamedSummarySection
         title="Equipment"
         items={character.equipment}
         editable={editable}
@@ -462,6 +468,31 @@ function ListSection({
         {title}
       </h3>
       <EditableList items={items} onChange={onChange} editable={editable} />
+    </div>
+  );
+}
+
+function NamedSummarySection({
+  title,
+  items,
+  editable,
+  onChange,
+}: {
+  title: string;
+  items: NamedSummary[];
+  editable: boolean;
+  onChange: (items: NamedSummary[]) => void;
+}) {
+  return (
+    <div>
+      <h3 className="mb-2 font-serif text-lg font-semibold text-amber-200">
+        {title}
+      </h3>
+      <EditableNamedSummaryList
+        items={items}
+        onChange={onChange}
+        editable={editable}
+      />
     </div>
   );
 }

@@ -3,15 +3,24 @@ import { enrichCharacter } from "@/lib/combat";
 import type { Character, EnrichedCharacter } from "@/lib/schemas";
 
 function stripEnrichment(enriched: EnrichedCharacter): Character {
-  const weapons = (enriched.weapons ?? []).map(
-    ({ attackBonus: _, damageBonus: __, ...base }) => base
-  );
+  const { spellAttackBonus, spellSaveDC, weapons: enrichedWeapons, ...rest } =
+    enriched;
+  void spellAttackBonus;
+  void spellSaveDC;
 
-  const { spellAttackBonus: _, spellSaveDC: __, ...rest } = enriched;
+  const weapons =
+    enrichedWeapons == null || enrichedWeapons.length === 0
+      ? null
+      : enrichedWeapons.map((w) => ({
+          name: w.name,
+          damage: w.damage,
+          damageType: w.damageType,
+          properties: w.properties,
+        }));
 
   return {
     ...rest,
-    weapons: weapons.length > 0 ? weapons : null,
+    weapons,
   };
 }
 

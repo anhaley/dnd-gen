@@ -26,8 +26,15 @@ function makeCharacter(overrides: Partial<Character> = {}): Character {
     skills: ["Athletics", "Intimidation"],
     proficiencies: ["All armor", "Shields", "Simple weapons", "Martial weapons"],
     weapons: null,
-    equipment: ["Chain mail", "Shield"],
-    features: ["Second Wind", "Action Surge", "Extra Attack"],
+    equipment: [
+      { name: "Chain mail", summary: "" },
+      { name: "Shield", summary: "" },
+    ],
+    features: [
+      { name: "Second Wind", summary: "" },
+      { name: "Action Surge", summary: "" },
+      { name: "Extra Attack", summary: "" },
+    ],
     spellSlots: null,
     spells: null,
     traits: {
@@ -339,7 +346,8 @@ describe("enrichCharacter", () => {
     it("preserves all original character fields", () => {
       const char = makeCharacter();
       const result = enrichCharacter(char);
-      const { weapons: _w, ...originalWithoutWeapons } = char;
+      const { weapons, ...originalWithoutWeapons } = char;
+      void weapons;
       expect(result).toMatchObject(originalWithoutWeapons);
     });
   });

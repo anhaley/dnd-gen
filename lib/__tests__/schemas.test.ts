@@ -5,6 +5,7 @@ import {
   WeaponSchema,
   AbilityScoresSchema,
   TraitsSchema,
+  NamedSummarySchema,
 } from "../schemas";
 
 const validAbilityScores = { str: 16, dex: 14, con: 14, int: 10, wis: 12, cha: 8 };
@@ -38,8 +39,11 @@ function validCharacter(overrides: Record<string, unknown> = {}) {
     weapons: [
       { name: "Longsword", damage: "1d8", damageType: "slashing", properties: ["versatile"] },
     ],
-    equipment: ["Explorer's pack"],
-    features: ["Favored Enemy", "Natural Explorer"],
+    equipment: [{ name: "Explorer's pack", summary: "" }],
+    features: [
+      { name: "Favored Enemy", summary: "" },
+      { name: "Natural Explorer", summary: "" },
+    ],
     spellSlots: [{ level: 1, slots: 4 }],
     spells: [{ name: "Cure Wounds", level: 1 }],
     traits: validTraits,
@@ -71,7 +75,11 @@ describe("TraitsSchema", () => {
   });
 
   it("rejects missing fields", () => {
-    const { flaws, ...partial } = validTraits;
+    const partial = {
+      personalityTraits: validTraits.personalityTraits,
+      ideals: validTraits.ideals,
+      bonds: validTraits.bonds,
+    };
     expect(TraitsSchema.safeParse(partial).success).toBe(false);
   });
 });
@@ -147,6 +155,7 @@ describe("CharacterSchema", () => {
 
   it("rejects missing required field", () => {
     const { name, ...noName } = validCharacter();
+    void name;
     const result = CharacterSchema.safeParse(noName);
     expect(result.success).toBe(false);
   });
@@ -174,6 +183,36 @@ describe("CharacterSchema", () => {
       validCharacter({ weapons: [{ name: "Sword" }] })
     );
     expect(result.success).toBe(false);
+  });
+
+  it("rejects legacy string entries in features", () => {
+    const bad = { ...validCharacter(), features: ["Arcane Recovery"] };
+    const result = CharacterSchema.safeParse(bad);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects feature summary longer than 280 characters", () => {
+    const result = CharacterSchema.safeParse(
+      validCharacter({
+        features: [{ name: "Test", summary: "x".repeat(281) }],
+      })
+    );
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("NamedSummarySchema", () => {
+  it("accepts name and summary within max length", () => {
+    expect(
+      NamedSummarySchema.safeParse({ name: "Rage", summary: "+2 dmg while raging" })
+        .success
+    ).toBe(true);
+  });
+
+  it("rejects summary over 280 characters", () => {
+    expect(
+      NamedSummarySchema.safeParse({ name: "X", summary: "y".repeat(281) }).success
+    ).toBe(false);
   });
 });
 

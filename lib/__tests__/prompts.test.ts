@@ -27,10 +27,18 @@ describe("SYSTEM_PROMPT", () => {
     expect(SYSTEM_PROMPT).toContain("known casters");
   });
 
-  it("instructs features to include choices in parentheses", () => {
+  it("instructs features to include choices in parentheses on name", () => {
     expect(SYSTEM_PROMPT).toContain("Spell Mastery (Shield, Misty Step)");
     expect(SYSTEM_PROMPT).toContain("Fighting Style (Dueling)");
     expect(SYSTEM_PROMPT).toContain("Metamagic (Quickened Spell, Twinned Spell)");
+  });
+
+  it("instructs features and equipment as { name, summary } with mechanics-first summaries", () => {
+    expect(SYSTEM_PROMPT).toContain("**features**");
+    expect(SYSTEM_PROMPT).toContain("**equipment**");
+    expect(SYSTEM_PROMPT).toContain("mechanics first");
+    expect(SYSTEM_PROMPT).toContain("shimmery blue velvet");
+    expect(SYSTEM_PROMPT).toContain("attacks vs. you have disadv");
   });
 
   it("instructs plain English speed format", () => {

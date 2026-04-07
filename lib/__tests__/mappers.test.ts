@@ -29,8 +29,15 @@ function makeRow(overrides: Record<string, unknown> = {}) {
     weapons: [
       { name: "Quarterstaff", damage: "1d6", damageType: "bludgeoning", properties: ["versatile"], attackBonus: 1, damageBonus: -1 },
     ],
-    equipment: ["Component pouch", "Scholar's pack"],
-    features: ["Arcane Recovery", "Evocation Savant", "Sculpt Spells"],
+    equipment: [
+      { name: "Component pouch", summary: "" },
+      { name: "Scholar's pack", summary: "" },
+    ],
+    features: [
+      { name: "Arcane Recovery", summary: "" },
+      { name: "Evocation Savant", summary: "" },
+      { name: "Sculpt Spells", summary: "" },
+    ],
     spellSlots: [{ level: 1, slots: 4 }, { level: 2, slots: 3 }, { level: 3, slots: 2 }],
     spells: [{ name: "Fire Bolt", level: 0 }, { name: "Fireball", level: 3 }],
     traits: {

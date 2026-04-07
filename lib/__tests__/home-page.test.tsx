@@ -80,8 +80,8 @@ function makeEnrichedCharacter(overrides: Partial<EnrichedCharacter> = {}): Enri
     skills: ["Arcana", "History"],
     proficiencies: ["Daggers"],
     weapons: null,
-    equipment: ["Scholar's pack"],
-    features: ["Arcane Recovery"],
+    equipment: [{ name: "Scholar's pack", summary: "" }],
+    features: [{ name: "Arcane Recovery", summary: "" }],
     spellSlots: [{ level: 1, slots: 4 }],
     spells: [{ name: "Fire Bolt", level: 0 }],
     traits: {
@@ -243,7 +243,10 @@ describe("Home page", () => {
       });
 
       const saveCalls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-        ([url, opts]: [string, RequestInit]) => url === "/api/characters" && opts?.method === "POST"
+        (call) => {
+          const [url, opts] = call as [string, RequestInit];
+          return url === "/api/characters" && opts?.method === "POST";
+        }
       );
       expect(saveCalls).toHaveLength(1);
 
@@ -274,8 +277,13 @@ describe("Home page", () => {
 
       await waitFor(() => {
         const historyFetches = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-          ([url, opts]: [string, RequestInit | undefined]) =>
-            url === "/api/characters" && (!opts || opts.method === undefined || opts.method === "GET")
+          (call) => {
+            const [url, opts] = call as [string, RequestInit | undefined];
+            return (
+              url === "/api/characters" &&
+              (!opts || opts.method === undefined || opts.method === "GET")
+            );
+          }
         );
         expect(historyFetches.length).toBeGreaterThanOrEqual(2);
       });
@@ -419,7 +427,10 @@ describe("Home page", () => {
       });
 
       const recalcCalls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-        ([url, opts]: [string, RequestInit]) => url === "/api/recalculate" && opts?.method === "POST"
+        (call) => {
+          const [url, opts] = call as [string, RequestInit];
+          return url === "/api/recalculate" && opts?.method === "POST";
+        }
       );
       expect(recalcCalls).toHaveLength(1);
     });
@@ -490,8 +501,10 @@ describe("Home page", () => {
 
       await waitFor(() => {
         const exportCalls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-          ([url, opts]: [string, RequestInit]) =>
-            url === "/api/export" && opts?.method === "POST"
+          (call) => {
+            const [url, opts] = call as [string, RequestInit];
+            return url === "/api/export" && opts?.method === "POST";
+          }
         );
         expect(exportCalls).toHaveLength(1);
       });

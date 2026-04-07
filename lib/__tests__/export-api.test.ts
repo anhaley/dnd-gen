@@ -32,8 +32,8 @@ function makeCharacterBody() {
     skills: ["Arcana", "History"],
     proficiencies: ["Daggers"],
     weapons: null,
-    equipment: ["Scholar's pack"],
-    features: ["Arcane Recovery"],
+    equipment: [{ name: "Scholar's pack", summary: "" }],
+    features: [{ name: "Arcane Recovery", summary: "" }],
     spellSlots: [{ level: 1, slots: 4 }],
     spells: [{ name: "Fire Bolt", level: 0 }],
     traits: {

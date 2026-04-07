@@ -9,14 +9,26 @@ vi.mock("@/auth", () => ({
 const mockSelectOrderBy = vi.fn();
 const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
 const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
-const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+const mockSelect = vi.fn((...args: unknown[]) => {
+  void args;
+  return { from: mockSelectFrom };
+});
 
 const mockInsertReturning = vi.fn();
-const mockInsertValues = vi.fn(() => ({ returning: mockInsertReturning }));
-const mockInsert = vi.fn(() => ({ values: mockInsertValues }));
+const mockInsertValues = vi.fn((values: unknown) => {
+  void values;
+  return { returning: mockInsertReturning };
+});
+const mockInsert = vi.fn((...args: unknown[]) => {
+  void args;
+  return { values: mockInsertValues };
+});
 
 const mockDeleteWhere = vi.fn();
-const mockDelete = vi.fn(() => ({ where: mockDeleteWhere }));
+const mockDelete = vi.fn((...args: unknown[]) => {
+  void args;
+  return { where: mockDeleteWhere };
+});
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -68,8 +80,8 @@ function makeDbRow(overrides: Record<string, unknown> = {}) {
     skills: ["Arcana", "History"],
     proficiencies: ["Daggers"],
     weapons: null,
-    equipment: ["Scholar's pack"],
-    features: ["Arcane Recovery"],
+    equipment: [{ name: "Scholar's pack", summary: "" }],
+    features: [{ name: "Arcane Recovery", summary: "" }],
     spellSlots: [{ level: 1, slots: 4 }],
     spells: [{ name: "Fire Bolt", level: 0 }],
     traits: {
@@ -166,8 +178,8 @@ describe("POST /api/characters", () => {
       skills: ["Arcana", "History"],
       proficiencies: ["Daggers"],
       weapons: null,
-      equipment: ["Scholar's pack"],
-      features: ["Arcane Recovery"],
+      equipment: [{ name: "Scholar's pack", summary: "" }],
+      features: [{ name: "Arcane Recovery", summary: "" }],
       spellSlots: [{ level: 1, slots: 4 }],
       spells: [{ name: "Fire Bolt", level: 0 }],
       traits: {
@@ -208,7 +220,7 @@ describe("POST /api/characters", () => {
     await POST(makePostRequest());
 
     expect(mockInsertValues).toHaveBeenCalledTimes(1);
-    const inserted = mockInsertValues.mock.calls[0][0];
+    const inserted = mockInsertValues.mock.calls[0][0] as { userId: string };
     expect(inserted.userId).toBe(TEST_USER_ID);
   });
 

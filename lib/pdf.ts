@@ -16,7 +16,12 @@ import {
   SPELLCASTING_ABILITY,
   SUBCLASS_SPELLCASTING_ABILITY,
 } from "./dnd-data";
-import type { EnrichedCharacter, AbilityScores } from "./schemas";
+import type { EnrichedCharacter, AbilityScores, NamedSummary } from "./schemas";
+
+function formatNamedSummaryLine(entry: NamedSummary): string {
+  const s = entry.summary.trim();
+  return s ? `${entry.name}: ${s}` : entry.name;
+}
 
 function abilityMod(score: number): number {
   return Math.floor((score - 10) / 2);
@@ -408,11 +413,16 @@ export async function fillCharacterSheet(
   safeSetText(form, "ProficienciesLang", character.proficiencies.join(", "), 8);
 
   // Equipment
-  const equipmentList = character.equipment.join(", ");
+  const equipmentList = character.equipment.map(formatNamedSummaryLine).join(", ");
   safeSetText(form, "Equipment", equipmentList, 8);
 
   // Features and Traits
-  safeSetText(form, "Features and Traits", character.features.join("\n"), 8);
+  safeSetText(
+    form,
+    "Features and Traits",
+    character.features.map(formatNamedSummaryLine).join("\n"),
+    8
+  );
 
   // Personality
   safeSetText(form, "PersonalityTraits ", character.traits.personalityTraits, 8);

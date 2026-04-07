@@ -39,8 +39,8 @@ function makeEnrichedBody(overrides: Record<string, unknown> = {}) {
         damageBonus: 999,
       },
     ],
-    equipment: ["Scholar's pack"],
-    features: ["Arcane Recovery"],
+    equipment: [{ name: "Scholar's pack", summary: "" }],
+    features: [{ name: "Arcane Recovery", summary: "" }],
     spellSlots: [{ level: 1, slots: 4 }, { level: 3, slots: 2 }],
     spells: [
       { name: "Fire Bolt", level: 0 },
