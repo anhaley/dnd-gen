@@ -16,9 +16,9 @@ export type ButtonSize = "sm" | "md";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "rounded-lg bg-primary text-stone-100 shadow-sm hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:hover:bg-primary",
+    "rounded-lg bg-primary text-stone-100 shadow-sm duration-200 ease-out hover:-translate-y-px hover:bg-primary-hover hover:shadow-button-hover active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm disabled:hover:bg-primary",
   secondary:
-    "rounded-lg border border-primary/55 bg-transparent text-accent-soft hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50",
+    "rounded-lg border border-primary/55 bg-transparent text-accent-soft shadow-sm duration-200 ease-out hover:-translate-y-px hover:bg-primary/15 hover:shadow-button-hover active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:hover:translate-y-0",
   subtle:
     "rounded-md border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-muted hover:border-border-strong hover:text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   ghost:
@@ -26,11 +26,11 @@ const variantClasses: Record<ButtonVariant, string> = {
   danger:
     "text-muted hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus rounded-md p-0.5",
   fabPrimary:
-    "bg-primary text-stone-100 shadow-fab hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50",
+    "bg-primary text-stone-100 shadow-fab duration-200 ease-out hover:-translate-y-px hover:bg-primary-hover hover:shadow-elevated active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:hover:translate-y-0",
   fabSecondary:
-    "bg-stone-700 text-stone-100 shadow-fab hover:bg-stone-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50",
+    "bg-stone-700 text-stone-100 shadow-fab duration-200 ease-out hover:-translate-y-px hover:bg-stone-600 hover:shadow-elevated active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:hover:translate-y-0",
   fabIcon:
-    "rounded-lg border border-border-strong bg-surface-elevated p-2 text-accent backdrop-blur-sm hover:bg-stone-800/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus",
+    "rounded-lg border border-border-strong bg-surface-elevated p-2 text-accent shadow-surface backdrop-blur-sm duration-200 ease-out hover:bg-stone-800/90 hover:shadow-card active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -63,7 +63,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       className={cn(
-        "transition",
+        "transition will-change-transform",
         variantClasses[variant],
         isFab && !fabIconOnly
           ? fabSize
@@ -79,4 +79,4 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 
 /** Class string for Next.js `<Link>` styled as a ghost button (sign in / sign out). */
 export const linkButtonClass =
-  "text-accent transition hover:text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm";
+  "text-accent transition duration-200 ease-out hover:text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm";

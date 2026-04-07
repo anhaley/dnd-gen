@@ -81,15 +81,15 @@ export default function CharacterSheet({
   return (
     <div className="space-y-0">
       {/* Header */}
-      <div className="border-b border-border pb-6">
+      <div className="border-b border-border/40 pb-6">
         {onExport && (
           <div className="mb-2 flex justify-end">
             <Button
               type="button"
-              variant="subtle"
+              variant="ghost"
               onClick={onExport}
               disabled={isExporting}
-              className="inline-flex items-center gap-1.5 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-heading disabled:cursor-not-allowed"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

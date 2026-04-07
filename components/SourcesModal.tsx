@@ -46,7 +46,7 @@ export default function SourcesModal({ open, onClose }: SourcesModalProps) {
   return (
     <dialog
       ref={dialogRef}
-      className="max-w-md rounded-xl border border-border-strong bg-surface-elevated p-0 text-foreground shadow-2xl backdrop:bg-overlay"
+      className="max-w-md rounded-xl border border-border-strong bg-surface-elevated p-0 text-foreground shadow-elevated backdrop:bg-overlay"
     >
       <div className="p-6">
         <div className="mb-4 flex items-center justify-between">

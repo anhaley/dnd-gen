@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
-import { Alert, Button, Card, Input, linkButtonClass } from "@/components/ui";
+import { Alert, Button, Card, Input, linkButtonClass, PageTitle } from "@/components/ui";
 
 const labelClass = "mb-1.5 block text-sm font-medium text-foreground/85";
 
@@ -40,12 +40,12 @@ export default function SignInPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-2 text-center font-serif text-3xl font-bold text-heading">
-          Sign In
-        </h1>
-        <p className="mb-8 text-center text-sm text-muted">
-          Sign in to save your generated characters
-        </p>
+        <PageTitle
+          variant="panel"
+          title="Sign In"
+          subtitle="Sign in to save your generated characters"
+          className="mb-0"
+        />
 
         <Card className="space-y-5 p-6">
           <form onSubmit={handleSubmit} className="space-y-5">

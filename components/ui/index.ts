@@ -1,6 +1,7 @@
 export { Alert } from "./alert";
 export { Button, linkButtonClass, type ButtonProps, type ButtonVariant } from "./button";
-export { Card, type CardProps } from "./card";
+export { Card, type CardProps, type CardVariant } from "./card";
+export { PageTitle, type PageTitleProps, type PageTitleVariant } from "./page-title";
 export { fieldClassName, fieldClassNameCompact } from "./field-classes";
 export { Input, type InputProps } from "./input";
 export { Label, type LabelProps } from "./label";

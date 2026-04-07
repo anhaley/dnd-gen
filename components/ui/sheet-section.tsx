@@ -19,7 +19,7 @@ export function SheetSection({
   return (
     <div
       className={cn(
-        "border-b border-border/60 py-6 last:border-b-0 last:pb-0",
+        "border-b border-border/40 py-5 last:border-b-0 last:pb-0 sm:py-6",
         className
       )}
       {...props}

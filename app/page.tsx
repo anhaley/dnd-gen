@@ -13,7 +13,7 @@ import {
   GenerateInput,
   SavedCharacter,
 } from "@/lib/schemas";
-import { Alert, Button, Card, linkButtonClass } from "@/components/ui";
+import { Alert, Button, Card, linkButtonClass, PageTitle } from "@/components/ui";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -223,7 +223,7 @@ export default function Home() {
       {/* History sidebar — only when signed in */}
       {isSignedIn && (
         <aside
-          className={`fixed inset-y-0 left-0 z-20 w-72 transform border-r border-border bg-surface-elevated/95 backdrop-blur-sm transition-transform duration-200 lg:relative lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-20 w-72 transform border-r border-border bg-surface-elevated/95 shadow-elevated backdrop-blur-sm transition-transform duration-200 ease-out lg:relative lg:translate-x-0 ${
             showHistory ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -282,13 +282,12 @@ export default function Home() {
           </div>
 
           {/* Title */}
-          <header className="mb-8 text-center">
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-heading sm:text-5xl">
-              D&D Character Generator
-            </h1>
-            <p className="mt-2 text-muted">
-              Create a 5th Edition (2014) character in seconds
-            </p>
+          <header className="mb-6 text-center">
+            <PageTitle
+              variant="hero"
+              title="D&D Character Generator"
+              subtitle="Create a 5th Edition (2014) character in seconds"
+            />
             <Button
               type="button"
               variant="subtle"
@@ -313,7 +312,7 @@ export default function Home() {
           />
 
           {/* Form card */}
-          <Card className="mb-8 p-5 sm:p-6">
+          <Card className="mb-6 p-5 sm:p-6">
             <CharacterForm onGenerate={handleGenerate} isLoading={isLoading} />
           </Card>
 
