@@ -18,7 +18,7 @@ vi.mock("openai/helpers/zod", () => ({
 
 import { POST } from "@/app/api/generate/route";
 
-function makeCompletionResult(parsed: Record<string, unknown> | null, refusal?: string) {
+function makeCompletionResult(parsed: Record<string, unknown> | null, refusal?: string, finish_reason = "stop") {
   return {
     choices: [
       {
@@ -27,6 +27,7 @@ function makeCompletionResult(parsed: Record<string, unknown> | null, refusal?: 
           refusal: refusal ?? null,
           content: parsed ? JSON.stringify(parsed) : null,
         },
+        finish_reason,
       },
     ],
     usage: { prompt_tokens: 100, completion_tokens: 50, total_tokens: 150 },
@@ -170,7 +171,7 @@ describe("POST /api/generate", () => {
 
   it("returns 502 when model returns no parsed content", async () => {
     mockParse.mockResolvedValue({
-      choices: [{ message: { parsed: null, refusal: null, content: null } }],
+      choices: [{ message: { parsed: null, refusal: null, content: null }, finish_reason: "stop" }],
       usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
     });
 
@@ -179,6 +180,42 @@ describe("POST /api/generate", () => {
 
     expect(response.status).toBe(502);
     expect(data.error).toBe("No response from OpenAI");
+  });
+
+  describe("model selection", () => {
+    it("uses gpt-4o-mini for levels below 12", async () => {
+      mockParse.mockResolvedValue(makeCompletionResult(makeCharacterData()));
+
+      await POST(makePostRequest({ level: 5 }));
+
+      expect(mockParse).toHaveBeenCalledOnce();
+      expect(mockParse.mock.calls[0][0].model).toBe("gpt-4o-mini");
+    });
+
+    it("uses gpt-4o for level 12 and above", async () => {
+      mockParse.mockResolvedValue(makeCompletionResult(makeCharacterData({ level: 12 })));
+
+      await POST(makePostRequest({ level: 12 }));
+
+      expect(mockParse).toHaveBeenCalledOnce();
+      expect(mockParse.mock.calls[0][0].model).toBe("gpt-4o");
+    });
+
+    it("uses gpt-4o for level 20", async () => {
+      mockParse.mockResolvedValue(makeCompletionResult(makeCharacterData({ level: 20 })));
+
+      await POST(makePostRequest({ level: 20 }));
+
+      expect(mockParse.mock.calls[0][0].model).toBe("gpt-4o");
+    });
+
+    it("uses gpt-4o when no level is specified (random)", async () => {
+      mockParse.mockResolvedValue(makeCompletionResult(makeCharacterData()));
+
+      await POST(makePostRequest({ isRandom: true, level: undefined, race: undefined, class: undefined }));
+
+      expect(mockParse.mock.calls[0][0].model).toBe("gpt-4o");
+    });
   });
 
   it("returns 500 on unexpected error", async () => {

@@ -18,9 +18,19 @@ describe("SYSTEM_PROMPT", () => {
     expect(SYSTEM_PROMPT).toContain("damageType");
   });
 
-  it("includes spellcasting instructions", () => {
+  it("includes spellcasting instructions requiring all spells", () => {
     expect(SYSTEM_PROMPT).toContain("spellSlots");
     expect(SYSTEM_PROMPT).toContain("Pact Magic");
+    expect(SYSTEM_PROMPT).toContain("ALL spells");
+    expect(SYSTEM_PROMPT).toContain("not a sample");
+    expect(SYSTEM_PROMPT).toContain("prepared casters");
+    expect(SYSTEM_PROMPT).toContain("known casters");
+  });
+
+  it("instructs features to include choices in parentheses", () => {
+    expect(SYSTEM_PROMPT).toContain("Spell Mastery (Shield, Misty Step)");
+    expect(SYSTEM_PROMPT).toContain("Fighting Style (Dueling)");
+    expect(SYSTEM_PROMPT).toContain("Metamagic (Quickened Spell, Twinned Spell)");
   });
 
   it("instructs plain English speed format", () => {
@@ -44,11 +54,13 @@ describe("buildUserPrompt", () => {
     const result = buildUserPrompt({ isRandom: true });
     expect(result).toContain("completely random");
     expect(result).toContain("interesting and unique");
+    expect(result).toContain("If this character is a spellcaster");
   });
 
   it("returns random prompt when no constraints are given", () => {
     const result = buildUserPrompt({});
     expect(result).toContain("completely random");
+    expect(result).toContain("If this character is a spellcaster");
   });
 
   it("includes level when specified", () => {
@@ -118,5 +130,43 @@ describe("buildUserPrompt", () => {
     const result = buildUserPrompt({ race: "Elf", class: "Ranger", level: 5 });
     const lines = result.split("\n");
     expect(lines.length).toBeGreaterThanOrEqual(4);
+  });
+
+  describe("spell count instructions", () => {
+    it("adds Wizard-specific cantrip count and prepared formula at level 20", () => {
+      const result = buildUserPrompt({ class: "Wizard", level: 20 });
+      expect(result).toContain("exactly 5 cantrip");
+      expect(result).toContain("abilityScores.int");
+      expect(result).toContain("abilityScores.int + character level");
+    });
+
+    it("adds Bard-specific known spell counts at level 5", () => {
+      const result = buildUserPrompt({ class: "Bard", level: 5 });
+      expect(result).toContain("This Bard at level 5");
+      expect(result).toContain("exactly 3 cantrip");
+      expect(result).toContain("exactly 8 leveled spell");
+    });
+
+    it("adds Eldritch Knight progression when Fighter has that subclass", () => {
+      const result = buildUserPrompt({
+        class: "Fighter",
+        subclass: "Eldritch Knight",
+        level: 12,
+      });
+      expect(result).toContain("Eldritch Knight");
+      expect(result).toContain("exactly 3 cantrip");
+      expect(result).toContain("exactly 8 leveled spell");
+    });
+
+    it("does not add spell-count instructions for Barbarian", () => {
+      const result = buildUserPrompt({ class: "Barbarian", level: 5 });
+      expect(result).not.toContain("If this character is a spellcaster");
+      expect(result).not.toContain("Spell list:");
+    });
+
+    it("adds generic spell instruction when level is missing for a caster", () => {
+      const result = buildUserPrompt({ class: "Wizard" });
+      expect(result).toContain("If this character is a spellcaster");
+    });
   });
 });

@@ -14,8 +14,12 @@ export async function POST(request: Request) {
 
     console.log("[generate] User prompt:", userPrompt);
 
+    const useFullModel = !input.level || input.level >= 12;
+    const model = useFullModel ? "gpt-4o" : "gpt-4o-mini";
+    console.log("[generate] Model:", model, "level:", input.level ?? "unspecified");
+
     const completion = await openai.chat.completions.parse({
-      model: "gpt-4o-mini",
+      model,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userPrompt },
@@ -24,9 +28,15 @@ export async function POST(request: Request) {
       temperature: 0.9,
     });
 
-    const message = completion.choices[0]?.message;
+    const choice = completion.choices[0];
+    const message = choice?.message;
     console.log("[generate] Raw OpenAI response:", message?.content);
     console.log("[generate] Usage:", JSON.stringify(completion.usage));
+    console.log("[generate] finish_reason:", choice?.finish_reason);
+
+    if (choice?.finish_reason === "length") {
+      console.warn("[generate] Response truncated due to token limit");
+    }
 
     if (message?.refusal) {
       return NextResponse.json(
