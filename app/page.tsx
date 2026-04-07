@@ -13,12 +13,13 @@ import {
   GenerateInput,
   SavedCharacter,
 } from "@/lib/schemas";
+import { Alert, Button, Card, linkButtonClass } from "@/components/ui";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const isSignedIn = status === "authenticated";
 
-  const sheetRef = useRef<HTMLElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const originalCharacterRef = useRef<string | null>(null);
 
   const [character, setCharacter] = useState<
@@ -198,9 +199,10 @@ export default function Home() {
     <div className="flex min-h-screen">
       {/* Mobile history toggle — only when signed in */}
       {isSignedIn && (
-        <button
+        <Button
+          variant="fabIcon"
           onClick={() => setShowHistory(!showHistory)}
-          className="fixed top-4 left-4 z-30 rounded-lg border border-amber-900/30 bg-stone-900/90 p-2 text-amber-400 backdrop-blur-sm transition hover:bg-stone-800 lg:hidden"
+          className="fixed top-4 left-4 z-30 lg:hidden"
           aria-label="Toggle history"
         >
           <svg
@@ -215,22 +217,22 @@ export default function Home() {
               clipRule="evenodd"
             />
           </svg>
-        </button>
+        </Button>
       )}
 
       {/* History sidebar — only when signed in */}
       {isSignedIn && (
         <aside
-          className={`fixed inset-y-0 left-0 z-20 w-72 transform border-r border-amber-900/20 bg-stone-950/95 backdrop-blur-sm transition-transform duration-200 lg:relative lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-20 w-72 transform border-r border-border bg-surface-elevated/95 backdrop-blur-sm transition-transform duration-200 lg:relative lg:translate-x-0 ${
             showHistory ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-amber-900/20 px-4 py-4">
-              <h2 className="font-serif text-lg font-semibold text-amber-200">
+            <div className="flex items-center justify-between border-b border-border px-4 py-4">
+              <h2 className="font-serif text-lg font-semibold text-heading">
                 History
               </h2>
-              <span className="text-xs text-stone-500">
+              <span className="text-xs text-muted">
                 {savedCharacters.length} saved
               </span>
             </div>
@@ -249,7 +251,7 @@ export default function Home() {
       {/* Overlay for mobile sidebar */}
       {isSignedIn && showHistory && (
         <div
-          className="fixed inset-0 z-10 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-10 bg-overlay lg:hidden"
           onClick={() => setShowHistory(false)}
         />
       )}
@@ -261,20 +263,18 @@ export default function Home() {
           <div className="mb-4 flex justify-end gap-3 text-sm">
             {isSignedIn ? (
               <>
-                <span className="text-stone-400">{session.user?.email}</span>
+                <span className="text-muted">{session.user?.email}</span>
                 <button
+                  type="button"
                   onClick={() => signOut()}
-                  className="text-amber-400 transition hover:text-amber-300"
+                  className={linkButtonClass}
                 >
                   Sign out
                 </button>
               </>
             ) : (
               status !== "loading" && (
-                <Link
-                  href="/signin"
-                  className="text-amber-400 transition hover:text-amber-300"
-                >
+                <Link href="/signin" className={linkButtonClass}>
                   Sign in
                 </Link>
               )
@@ -283,15 +283,17 @@ export default function Home() {
 
           {/* Title */}
           <header className="mb-8 text-center">
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-amber-100 sm:text-5xl">
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-heading sm:text-5xl">
               D&D Character Generator
             </h1>
-            <p className="mt-2 text-stone-400">
+            <p className="mt-2 text-muted">
               Create a 5th Edition (2014) character in seconds
             </p>
-            <button
+            <Button
+              type="button"
+              variant="subtle"
               onClick={() => setShowSources(true)}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-amber-900/30 px-3 py-1.5 text-sm text-stone-400 transition hover:border-amber-700/40 hover:text-amber-300"
+              className="mt-3 inline-flex items-center gap-1.5"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -302,7 +304,7 @@ export default function Home() {
                 <path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.04a.75.75 0 00-.546-.721A9.006 9.006 0 0015 2a8.963 8.963 0 00-4.25 1.065V16.82zM9.25 4.065A8.963 8.963 0 005 3a9.006 9.006 0 00-2.454.319A.75.75 0 002 4.04v12.02a.75.75 0 00.954.721A7.462 7.462 0 015 16.5c1.578 0 3.05.488 4.25 1.32V4.065z" />
               </svg>
               Sources
-            </button>
+            </Button>
           </header>
 
           <SourcesModal
@@ -311,15 +313,15 @@ export default function Home() {
           />
 
           {/* Form card */}
-          <section className="mb-8 rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6">
+          <Card className="mb-8 p-5 sm:p-6">
             <CharacterForm onGenerate={handleGenerate} isLoading={isLoading} />
-          </section>
+          </Card>
 
           {/* Error */}
           {error && (
-            <div className="mb-6 rounded-lg border border-red-800/40 bg-red-950/30 px-4 py-3 text-sm text-red-300">
+            <Alert className="mb-6">
               <span className="font-semibold">Error:</span> {error}
-            </div>
+            </Alert>
           )}
 
           {/* Loading */}
@@ -328,10 +330,7 @@ export default function Home() {
           {/* Character sheet */}
           {character && !isLoading && (
             <>
-              <section
-                ref={sheetRef}
-                className="rounded-xl border border-amber-900/20 bg-stone-900/50 p-5 sm:p-6"
-              >
+              <Card ref={sheetRef} className="p-5 sm:p-6">
                 <CharacterSheet
                   character={character}
                   editable
@@ -339,14 +338,11 @@ export default function Home() {
                   onExport={handleExport}
                   isExporting={isExporting}
                 />
-              </section>
+              </Card>
 
               {!isSignedIn && (
-                <p className="mt-4 text-center text-sm text-stone-500">
-                  <Link
-                    href="/signin"
-                    className="text-amber-400 hover:text-amber-300"
-                  >
+                <p className="mt-4 text-center text-sm text-muted">
+                  <Link href="/signin" className={linkButtonClass}>
                     Sign in
                   </Link>{" "}
                   to save characters and build your collection.
@@ -359,9 +355,11 @@ export default function Home() {
 
       {/* Floating recalculate button */}
       {isEdited && (
-        <button
+        <Button
+          type="button"
+          variant="fabSecondary"
           onClick={handleRecalculate}
-          className="fixed bottom-6 left-6 z-30 flex items-center gap-2 rounded-full bg-stone-700 px-5 py-3 text-sm font-semibold text-stone-100 shadow-lg shadow-black/40 transition hover:bg-stone-600"
+          className="fixed bottom-6 left-6 z-30"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -376,14 +374,16 @@ export default function Home() {
             />
           </svg>
           Recalculate stats
-        </button>
+        </Button>
       )}
 
       {/* Floating save button */}
       {isSignedIn && !isLoading && isUnsaved && (
-        <button
+        <Button
+          type="button"
+          variant="fabPrimary"
           onClick={handleSave}
-          className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-full bg-amber-700 px-5 py-3 text-sm font-semibold text-stone-100 shadow-lg shadow-black/40 transition hover:bg-amber-600"
+          className="fixed bottom-6 right-6 z-30"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -394,7 +394,7 @@ export default function Home() {
             <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
           </svg>
           Save this character
-        </button>
+        </Button>
       )}
     </div>
   );

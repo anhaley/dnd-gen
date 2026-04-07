@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui";
 
 const SOURCES = [
   "Player's Handbook",
@@ -45,16 +46,18 @@ export default function SourcesModal({ open, onClose }: SourcesModalProps) {
   return (
     <dialog
       ref={dialogRef}
-      className="max-w-md rounded-xl border border-amber-900/30 bg-stone-900 p-0 text-stone-200 shadow-2xl backdrop:bg-black/60"
+      className="max-w-md rounded-xl border border-border-strong bg-surface-elevated p-0 text-foreground shadow-2xl backdrop:bg-overlay"
     >
       <div className="p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-serif text-xl font-semibold text-amber-200">
+          <h2 className="font-serif text-xl font-semibold text-heading">
             Included Sources
           </h2>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
             onClick={onClose}
-            className="rounded-md p-1 text-stone-500 transition hover:text-stone-300"
+            className="p-1 text-muted hover:text-foreground"
             aria-label="Close"
           >
             <svg
@@ -65,9 +68,9 @@ export default function SourcesModal({ open, onClose }: SourcesModalProps) {
             >
               <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
             </svg>
-          </button>
+          </Button>
         </div>
-        <p className="mb-4 text-sm text-stone-400">
+        <p className="mb-4 text-sm text-muted">
           Races, classes, subclasses, and backgrounds are drawn from these D&D
           5E (2014) sourcebooks:
         </p>
@@ -75,9 +78,9 @@ export default function SourcesModal({ open, onClose }: SourcesModalProps) {
           {SOURCES.map((name) => (
             <li
               key={name}
-              className="flex items-center gap-2 text-sm text-stone-300"
+              className="flex items-center gap-2 text-sm text-foreground/90"
             >
-              <span className="text-amber-700/60">&#x2022;</span>
+              <span className="text-primary/70">&#x2022;</span>
               {name}
             </li>
           ))}

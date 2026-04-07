@@ -9,6 +9,7 @@ import {
   BACKGROUNDS,
 } from "@/lib/dnd-data";
 import { GenerateInput } from "@/lib/schemas";
+import { Button, Input, Label, Select } from "@/components/ui";
 
 interface CharacterFormProps {
   onGenerate: (input: GenerateInput) => void;
@@ -95,20 +96,17 @@ export default function CharacterForm({
           placeholder={charClass ? "Choose subclass..." : "Select a class first"}
         />
         <div>
-          <label className="mb-1 block text-sm font-medium text-amber-200/80">
-            Level
-          </label>
-          <input
+          <Label>Level</Label>
+          <Input
             type="number"
             min={1}
             max={20}
-            value={level}
+            value={level === "" ? "" : level}
             onChange={(e) =>
               setLevel(e.target.value ? Number(e.target.value) : "")
             }
             disabled={isLoading}
             placeholder="1–20"
-            className="w-full rounded-lg border border-amber-900/30 bg-stone-900/60 px-3 py-2 text-stone-100 placeholder-stone-500 transition focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30 disabled:opacity-50"
           />
         </div>
         <SelectField
@@ -122,21 +120,23 @@ export default function CharacterForm({
       </div>
 
       <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={isLoading}
-          className="flex-1 rounded-lg bg-amber-700 px-5 py-2.5 font-semibold text-white transition hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:hover:bg-amber-700"
+          className="flex-1"
         >
           {isLoading && loadingSource === "custom" ? "Generating..." : "Generate Character"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          onClick={handleRandom}
+          variant="secondary"
           disabled={isLoading}
-          className="flex-1 rounded-lg border border-amber-700/50 px-5 py-2.5 font-semibold text-amber-300 transition hover:bg-amber-900/30 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50"
+          onClick={handleRandom}
+          className="flex-1"
         >
           {isLoading && loadingSource === "random" ? "Generating..." : "Fully Random"}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -161,14 +161,11 @@ function SelectField({
 }) {
   return (
     <div className={className}>
-      <label className="mb-1 block text-sm font-medium text-amber-200/80">
-        {label}
-      </label>
-      <select
+      <Label>{label}</Label>
+      <Select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full rounded-lg border border-amber-900/30 bg-stone-900/60 px-3 py-2 text-stone-100 transition focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30 disabled:opacity-50"
       >
         <option value="">{placeholder}</option>
         {options.map((opt) => (
@@ -176,7 +173,7 @@ function SelectField({
             {opt}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

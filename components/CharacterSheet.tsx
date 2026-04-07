@@ -5,7 +5,6 @@ import {
   EnrichedCharacter,
   EnrichedWeapon,
   AbilityScores,
-  NamedSummary,
 } from "@/lib/schemas";
 import { RACE_VARIANTS } from "@/lib/dnd-data";
 import {
@@ -15,6 +14,7 @@ import {
   EditableList,
   EditableNamedSummaryList,
 } from "./EditableField";
+import { Button, SheetSection } from "@/components/ui";
 
 interface CharacterSheetProps {
   character: EnrichedCharacter;
@@ -79,15 +79,17 @@ export default function CharacterSheet({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-0">
       {/* Header */}
-      <div className="border-b border-amber-900/30 pb-4">
+      <div className="border-b border-border pb-6">
         {onExport && (
-          <div className="flex justify-end mb-2">
-            <button
+          <div className="mb-2 flex justify-end">
+            <Button
+              type="button"
+              variant="subtle"
               onClick={onExport}
               disabled={isExporting}
-              className="flex items-center gap-1.5 rounded-md border border-amber-900/30 px-3 py-1.5 text-sm text-stone-400 transition hover:border-amber-700/40 hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 disabled:cursor-not-allowed"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +101,7 @@ export default function CharacterSheet({
                 <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
               </svg>
               {isExporting ? "Exporting..." : "Export to PDF"}
-            </button>
+            </Button>
           </div>
         )}
         {editable ? (
@@ -108,9 +110,9 @@ export default function CharacterSheet({
               value={character.name}
               onChange={(v) => update({ name: v })}
               editable
-              className="font-serif text-3xl font-bold text-amber-100"
+              className="font-serif text-3xl font-bold text-heading"
             />
-            <div className="flex flex-wrap items-center gap-2 text-lg text-stone-400">
+            <div className="flex flex-wrap items-center gap-2 text-lg text-muted">
               <span>Level</span>
               <EditableNumber
                 value={character.level}
@@ -148,7 +150,7 @@ export default function CharacterSheet({
                 className="w-36"
               />
             </div>
-            <div className="flex items-center gap-2 text-sm text-stone-500">
+            <div className="flex items-center gap-2 text-sm text-muted">
               <EditableText
                 value={character.alignment}
                 onChange={(v) => update({ alignment: v })}
@@ -166,10 +168,10 @@ export default function CharacterSheet({
           </div>
         ) : (
           <>
-            <h2 className="font-serif text-3xl font-bold text-amber-100">
+            <h2 className="font-serif text-3xl font-bold text-heading">
               {character.name}
             </h2>
-            <p className="mt-1 text-lg text-stone-400">
+            <p className="mt-1 text-lg text-muted">
               Level {character.level}{" "}
               {character.raceVariant && character.raceVariant !== "null"
                 ? `${character.raceVariant} ${character.race}`
@@ -177,7 +179,7 @@ export default function CharacterSheet({
               {character.class}
               {character.subclass ? ` (${character.subclass})` : ""}
             </p>
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-muted">
               {character.alignment} &middot; {character.background}
             </p>
           </>
@@ -185,7 +187,7 @@ export default function CharacterSheet({
       </div>
 
       {/* Core stats bar */}
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-3 gap-3 border-b border-border py-6 sm:grid-cols-4">
         <StatBox
           label="HP"
           value={character.hitPoints}
@@ -214,18 +216,15 @@ export default function CharacterSheet({
       </div>
 
       {/* Ability scores */}
-      <div>
-        <h3 className="mb-3 font-serif text-lg font-semibold text-amber-200">
-          Ability Scores
-        </h3>
+      <SheetSection title="Ability scores">
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
           {(["str", "dex", "con", "int", "wis", "cha"] as const).map(
             (ability) => (
               <div
                 key={ability}
-                className="flex flex-col items-center rounded-lg border border-amber-900/20 bg-stone-900/40 px-2 py-3"
+                className="flex flex-col items-center rounded-lg border border-border bg-surface px-2 py-3"
               >
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-400/70">
+                <span className="text-xs font-semibold uppercase tracking-wider text-accent-soft/80">
                   {ability}
                 </span>
                 {editable ? (
@@ -233,53 +232,65 @@ export default function CharacterSheet({
                     value={character.abilityScores[ability]}
                     onChange={(v) => updateAbility(ability, v)}
                     editable
-                    className="mt-1 w-14 text-center text-2xl font-bold"
+                    className="mt-1 w-14 text-center text-2xl font-bold tabular-nums"
                   />
                 ) : (
-                  <span className="mt-1 text-2xl font-bold text-stone-100">
+                  <span className="mt-1 text-2xl font-bold tabular-nums text-foreground">
                     {character.abilityScores[ability]}
                   </span>
                 )}
-                <span className="text-sm text-stone-400">
+                <span className="text-sm tabular-nums text-muted">
                   {abilityModifier(character.abilityScores[ability])}
                 </span>
               </div>
             )
           )}
         </div>
-      </div>
+      </SheetSection>
 
       {/* Saving throws & Skills */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ListSection
-          title="Saving Throws"
-          items={character.savingThrows}
-          editable={editable}
-          onChange={(items) => update({ savingThrows: items })}
-        />
-        <ListSection
-          title="Skills"
-          items={character.skills}
-          editable={editable}
-          onChange={(items) => update({ skills: items })}
-        />
-      </div>
+      <SheetSection title="Saving throws & skills">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+              Saving throws
+            </p>
+            <EditableList
+              items={character.savingThrows}
+              onChange={(items) => update({ savingThrows: items })}
+              editable={editable}
+            />
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+              Skills
+            </p>
+            <EditableList
+              items={character.skills}
+              onChange={(items) => update({ skills: items })}
+              editable={editable}
+            />
+          </div>
+        </div>
+      </SheetSection>
 
       {/* Proficiencies */}
-      <ListSection
-        title="Proficiencies"
-        items={character.proficiencies}
-        editable={editable}
-        onChange={(items) => update({ proficiencies: items })}
-      />
+      <SheetSection title="Proficiencies">
+        <EditableList
+          items={character.proficiencies}
+          onChange={(items) => update({ proficiencies: items })}
+          editable={editable}
+        />
+      </SheetSection>
 
       {/* Features */}
-      <NamedSummarySection
-        title="Features"
-        items={character.features}
-        editable={editable}
-        onChange={(items) => update({ features: items })}
-      />
+      <SheetSection title="Features">
+        <EditableNamedSummaryList
+          items={character.features}
+          onChange={(items) => update({ features: items })}
+          editable={editable}
+        />
+      </SheetSection>
 
       {/* Spellcasting */}
       {character.spells && character.spells.length > 0 && (
@@ -306,19 +317,17 @@ export default function CharacterSheet({
       )}
 
       {/* Equipment */}
-      <NamedSummarySection
-        title="Equipment"
-        items={character.equipment}
-        editable={editable}
-        onChange={(items) => update({ equipment: items })}
-      />
+      <SheetSection title="Equipment">
+        <EditableNamedSummaryList
+          items={character.equipment}
+          onChange={(items) => update({ equipment: items })}
+          editable={editable}
+        />
+      </SheetSection>
 
       {/* Traits */}
-      <div>
-        <h3 className="mb-3 font-serif text-lg font-semibold text-amber-200">
-          Personality
-        </h3>
-        <div className="space-y-3 rounded-lg border border-amber-900/20 bg-stone-900/40 p-4">
+      <SheetSection title="Personality">
+        <div className="space-y-3 rounded-lg border border-border bg-surface p-4">
           <TraitRow
             label="Traits"
             value={character.traits.personalityTraits}
@@ -344,26 +353,23 @@ export default function CharacterSheet({
             onChange={(v) => updateTrait("flaws", v)}
           />
         </div>
-      </div>
+      </SheetSection>
 
       {/* Backstory */}
-      <div>
-        <h3 className="mb-3 font-serif text-lg font-semibold text-amber-200">
-          Backstory
-        </h3>
+      <SheetSection title="Backstory">
         {editable ? (
           <EditableTextarea
             value={character.backstory}
             onChange={(v) => update({ backstory: v })}
             editable
-            className="w-full rounded-lg border-amber-900/20 bg-stone-900/40 p-4 leading-relaxed text-stone-300 italic"
+            className="w-full rounded-lg border-border bg-surface p-4 leading-relaxed text-foreground/90 italic"
           />
         ) : (
-          <p className="rounded-lg border border-amber-900/20 bg-stone-900/40 p-4 leading-relaxed text-stone-300 italic">
+          <p className="rounded-lg border border-border bg-surface p-4 leading-relaxed text-foreground/90 italic">
             {character.backstory}
           </p>
         )}
-      </div>
+      </SheetSection>
     </div>
   );
 }
@@ -389,13 +395,13 @@ function StatBox({
   const displayValue = isNumber ? String(value) : value;
 
   return (
-    <div className="relative flex flex-col items-center rounded-lg border border-amber-900/20 bg-stone-900/40 px-3 py-2">
-      <span className="text-xs font-medium uppercase tracking-wider text-stone-500">
+    <div className="relative flex flex-col items-center rounded-lg border border-border bg-surface px-3 py-2">
+      <span className="text-xs font-medium uppercase tracking-wider text-muted">
         {label}
         {tooltip && (
           <button
             onClick={() => setShowTip((prev) => !prev)}
-            className="ml-1 inline-flex align-middle text-stone-600 transition hover:text-amber-400"
+            className="ml-1 inline-flex align-middle text-muted transition hover:text-accent"
             aria-label={`${label} details`}
           >
             <svg
@@ -419,22 +425,22 @@ function StatBox({
             value={value as number}
             onChange={onNumberChange}
             editable
-            className="mt-0.5 w-16 text-center text-xl font-bold"
+            className="mt-0.5 w-16 text-center text-xl font-bold tabular-nums"
           />
         ) : onTextChange ? (
           <EditableText
             value={displayValue}
             onChange={onTextChange}
             editable
-            className="mt-0.5 w-20 text-center text-xl font-bold"
+            className="mt-0.5 w-20 text-center text-xl font-bold tabular-nums"
           />
         ) : (
-          <span className="mt-0.5 text-xl font-bold text-amber-100">
+          <span className="mt-0.5 text-xl font-bold tabular-nums text-heading">
             {displayValue}
           </span>
         )
       ) : (
-        <span className="mt-0.5 text-xl font-bold text-amber-100">
+        <span className="mt-0.5 text-xl font-bold tabular-nums text-heading">
           {isNumber
             ? label === "Prof. Bonus"
               ? `+${value}`
@@ -443,56 +449,10 @@ function StatBox({
         </span>
       )}
       {showTip && tooltip && (
-        <div className="absolute top-full z-10 mt-1 whitespace-nowrap rounded-md border border-amber-900/30 bg-stone-900 px-2.5 py-1.5 text-xs text-stone-300 shadow-lg">
+        <div className="absolute top-full z-10 mt-1 whitespace-nowrap rounded-md border border-border-strong bg-surface-elevated px-2.5 py-1.5 text-xs text-foreground shadow-lg">
           {tooltip}
         </div>
       )}
-    </div>
-  );
-}
-
-function ListSection({
-  title,
-  items,
-  editable,
-  onChange,
-}: {
-  title: string;
-  items: string[];
-  editable: boolean;
-  onChange: (items: string[]) => void;
-}) {
-  return (
-    <div>
-      <h3 className="mb-2 font-serif text-lg font-semibold text-amber-200">
-        {title}
-      </h3>
-      <EditableList items={items} onChange={onChange} editable={editable} />
-    </div>
-  );
-}
-
-function NamedSummarySection({
-  title,
-  items,
-  editable,
-  onChange,
-}: {
-  title: string;
-  items: NamedSummary[];
-  editable: boolean;
-  onChange: (items: NamedSummary[]) => void;
-}) {
-  return (
-    <div>
-      <h3 className="mb-2 font-serif text-lg font-semibold text-amber-200">
-        {title}
-      </h3>
-      <EditableNamedSummaryList
-        items={items}
-        onChange={onChange}
-        editable={editable}
-      />
     </div>
   );
 }
@@ -510,12 +470,12 @@ function TraitRow({
 }) {
   return (
     <div>
-      <span className="text-sm font-semibold text-amber-400/70">{label}: </span>
+      <span className="text-sm font-semibold text-accent-soft/90">{label}: </span>
       <EditableText
         value={value}
         onChange={onChange}
         editable={editable}
-        className="text-sm text-stone-300"
+        className="text-sm text-foreground/85"
       />
     </div>
   );
@@ -556,16 +516,12 @@ function SpellcastingSection({
   const levels = [...grouped.keys()].sort((a, b) => a - b);
 
   return (
-    <div>
-      <h3 className="mb-3 font-serif text-lg font-semibold text-amber-200">
-        Spellcasting
-      </h3>
-
+    <SheetSection title="Spellcasting">
       {(spellAttackBonus != null || spellSaveDC != null) && (
         <div className="mb-4 flex gap-3">
           {spellAttackBonus != null && (
-            <div className="flex flex-col items-center rounded-lg border border-amber-900/20 bg-stone-900/40 px-4 py-2">
-              <span className="text-xs font-medium uppercase tracking-wider text-stone-500">
+            <div className="flex flex-col items-center rounded-lg border border-border bg-surface px-4 py-2">
+              <span className="text-xs font-medium uppercase tracking-wider text-muted">
                 Spell Attack
               </span>
               {editable ? (
@@ -573,18 +529,18 @@ function SpellcastingSection({
                   value={spellAttackBonus}
                   onChange={(v) => onSpellAttackBonusChange(v)}
                   editable
-                  className="mt-0.5 w-16 text-center text-xl font-bold"
+                  className="mt-0.5 w-16 text-center text-xl font-bold tabular-nums"
                 />
               ) : (
-                <span className="mt-0.5 text-xl font-bold text-amber-100">
+                <span className="mt-0.5 text-xl font-bold tabular-nums text-heading">
                   {formatBonus(spellAttackBonus)}
                 </span>
               )}
             </div>
           )}
           {spellSaveDC != null && (
-            <div className="flex flex-col items-center rounded-lg border border-amber-900/20 bg-stone-900/40 px-4 py-2">
-              <span className="text-xs font-medium uppercase tracking-wider text-stone-500">
+            <div className="flex flex-col items-center rounded-lg border border-border bg-surface px-4 py-2">
+              <span className="text-xs font-medium uppercase tracking-wider text-muted">
                 Spell Save DC
               </span>
               {editable ? (
@@ -592,10 +548,10 @@ function SpellcastingSection({
                   value={spellSaveDC}
                   onChange={(v) => onSpellSaveDCChange(v)}
                   editable
-                  className="mt-0.5 w-16 text-center text-xl font-bold"
+                  className="mt-0.5 w-16 text-center text-xl font-bold tabular-nums"
                 />
               ) : (
-                <span className="mt-0.5 text-xl font-bold text-amber-100">
+                <span className="mt-0.5 text-xl font-bold tabular-nums text-heading">
                   {spellSaveDC}
                 </span>
               )}
@@ -613,12 +569,12 @@ function SpellcastingSection({
           return (
             <div key={level}>
               <div className="mb-1.5 flex items-baseline gap-2">
-                <span className="text-sm font-semibold text-amber-400/70">
+                <span className="text-sm font-semibold text-accent-soft/90">
                   {heading}
                 </span>
                 {level > 0 && slotInfo != null && (
                   editable ? (
-                    <span className="flex items-center gap-1 text-xs text-stone-500">
+                    <span className="flex items-center gap-1 text-xs text-muted">
                       <EditableNumber
                         value={slotInfo.slots}
                         onChange={(v) => onSpellSlotChange(slotInfo.index, { slots: v })}
@@ -628,7 +584,7 @@ function SpellcastingSection({
                       {slotInfo.slots === 1 ? "slot" : "slots"}
                     </span>
                   ) : (
-                    <span className="text-xs text-stone-500">
+                    <span className="text-xs text-muted">
                       {slotInfo.slots} {slotInfo.slots === 1 ? "slot" : "slots"}
                     </span>
                   )
@@ -642,12 +598,12 @@ function SpellcastingSection({
                       value={entry.name}
                       onChange={(v) => onSpellChange(entry.originalIndex, { name: v })}
                       editable
-                      className="rounded-md border border-amber-900/20 bg-stone-900/40 px-2.5 py-1 text-sm"
+                      className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm"
                     />
                   ) : (
                     <span
                       key={entry.originalIndex}
-                      className="rounded-md border border-amber-900/20 bg-stone-900/40 px-2.5 py-1 text-sm text-stone-300"
+                      className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm text-foreground/90"
                     >
                       {entry.name}
                     </span>
@@ -658,7 +614,7 @@ function SpellcastingSection({
           );
         })}
       </div>
-    </div>
+    </SheetSection>
   );
 }
 
@@ -672,16 +628,13 @@ function WeaponsSection({
   onWeaponChange: (index: number, patch: Partial<EnrichedWeapon>) => void;
 }) {
   return (
-    <div>
-      <h3 className="mb-3 font-serif text-lg font-semibold text-amber-200">
-        Weapons
-      </h3>
+    <SheetSection title="Weapons">
       <div className="space-y-2">
         {weapons.map((w, i) =>
           editable ? (
             <div
               key={i}
-              className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg border border-amber-900/20 bg-stone-900/40 px-4 py-2.5"
+              className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg border border-border bg-surface px-4 py-2.5"
             >
               <EditableText
                 value={w.name}
@@ -689,7 +642,7 @@ function WeaponsSection({
                 editable
                 className="w-32 font-medium"
               />
-              <div className="flex items-center gap-1 text-sm text-amber-400/80">
+              <div className="flex items-center gap-1 text-sm text-accent-soft">
                 <EditableNumber
                   value={w.attackBonus}
                   onChange={(v) => onWeaponChange(i, { attackBonus: v })}
@@ -698,7 +651,7 @@ function WeaponsSection({
                 />
                 <span>to hit</span>
               </div>
-              <div className="flex items-center gap-1 text-sm text-stone-300">
+              <div className="flex items-center gap-1 text-sm text-foreground/85">
                 <EditableText
                   value={w.damage}
                   onChange={(v) => onWeaponChange(i, { damage: v })}
@@ -722,19 +675,19 @@ function WeaponsSection({
           ) : (
             <div
               key={i}
-              className="flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-lg border border-amber-900/20 bg-stone-900/40 px-4 py-2.5"
+              className="flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-lg border border-border bg-surface px-4 py-2.5"
             >
-              <span className="font-medium text-stone-200">{w.name}</span>
-              <span className="text-sm text-amber-400/80">
+              <span className="font-medium text-foreground">{w.name}</span>
+              <span className="text-sm text-accent-soft">
                 {formatBonus(w.attackBonus)} to hit
               </span>
-              <span className="text-sm text-stone-300">
+              <span className="text-sm text-foreground/85">
                 {w.damage}
                 {w.damageBonus !== 0 && ` ${formatBonus(w.damageBonus)}`}{" "}
                 {w.damageType}
               </span>
               {w.properties.length > 0 && (
-                <span className="text-xs text-stone-500">
+                <span className="text-xs text-muted">
                   ({w.properties.join(", ")})
                 </span>
               )}
@@ -742,6 +695,6 @@ function WeaponsSection({
           )
         )}
       </div>
-    </div>
+    </SheetSection>
   );
 }
