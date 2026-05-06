@@ -3,13 +3,14 @@
 /*
  * Style contract — Arcane Laboratory (dual accents)
  * ---------------------------------------------------------------------------
- * Accent A (violet): primary CTAs, links, FAB save, focus rings, hero chrome.
- * Accent B (teal): secondary CTAs, success highlights, FAB recalculate — never
- * mixed on the same control (no violet fill + teal border on one button).
+ * Accent A (soft violet): primary CTAs, links, FAB save, focus rings, hero chrome.
+ * Accent B (light green): secondary CTAs, highlights, FAB recalculate — never
+ * mixed on the same control (no violet fill + green border on one button).
+ * Surfaces: medium-dark green (laboratory glass), not purple-gray.
  *
  * | Variant       | Accent | Notes                                      |
  * |---------------|--------|--------------------------------------------|
- * | primary       | A      | Solid violet; text light                   |
+ * | primary       | A      | Muted blue-violet fill; text light            |
  * | secondary     | B*     | Neutral border; hover uses B only          |
  * | subtle        | none   | Border neutral; hover heading text         |
  * | ghost         | A      | Text link-style violet → heading on hover  |
@@ -22,35 +23,37 @@
  */
 
 @theme inline {
-  --color-background: #0e0c14;
-  --color-foreground: #e8e4f0;
+  --color-background: #0a100e;
+  --color-foreground: #e6ebe8;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-marcellus), ui-serif, Georgia, serif;
 
-  /* Dual accents */
-  --color-accent-a: #a78bfa;
-  --color-accent-a-muted: rgb(167 139 250 / 0.55);
-  --color-accent-b: #2dd4bf;
-  --color-accent-b-muted: rgb(45 212 191 / 0.45);
+  /* Dual accents — A is desaturated vs. neon violet so it pairs with green */
+  --color-accent-a: #9b92c4;
+  --color-accent-a-muted: rgb(155 146 196 / 0.5);
+  --color-accent-b: #86efac;
+  --color-accent-b-muted: rgb(134 239 172 / 0.5);
 
   /* Semantic map (consumers use accent / primary / ring-focus) */
-  --color-accent: #a78bfa;
-  --color-accent-soft: rgb(196 181 253 / 0.88);
-  --color-primary: #7c3aed;
-  --color-primary-hover: #6d28d9;
-  --color-heading: rgb(237 233 254);
-  --color-muted: rgb(180 174 198);
-  --color-surface: #1e1b2e;
-  --color-surface-elevated: #252136;
-  --color-surface-muted: rgb(18 16 28 / 0.72);
-  --color-border: rgb(139 92 246 / 0.18);
-  --color-border-strong: rgb(167 139 250 / 0.28);
+  --color-accent: #a8a0cf;
+  --color-accent-soft: rgb(186 180 214 / 0.92);
+  --color-primary: #565370;
+  --color-primary-hover: #4a475f;
+  --color-heading: rgb(236 252 244);
+  --color-muted: rgb(163 184 174);
+  /* Medium-dark green surfaces */
+  --color-surface: #152820;
+  --color-surface-elevated: #1c3228;
+  --color-surface-muted: rgb(14 24 20 / 0.78);
+  /* Light green–tinted edges (accents stay violet via ring / primary) */
+  --color-border: rgb(110 231 183 / 0.14);
+  --color-border-strong: rgb(134 239 172 / 0.24);
   --color-danger: rgb(252 165 165);
   --color-danger-foreground: rgb(254 226 226);
   --color-danger-border: rgb(190 18 60 / 0.45);
   --color-danger-surface: rgb(88 28 28 / 0.4);
   --color-overlay: rgb(0 0 0 / 0.55);
-  --color-ring-focus: rgb(167 139 250 / 0.55);
+  --color-ring-focus: rgb(168 160 207 / 0.55);
 
   --shadow-surface: 0 1px 2px rgb(0 0 0 / 0.2);
   --shadow-card:
@@ -62,7 +65,7 @@
     0 14px 44px -10px rgb(0 0 0 / 0.58), 0 6px 16px rgb(0 0 0 / 0.38);
   --shadow-button-hover: 0 6px 18px -4px rgb(0 0 0 / 0.42);
   --shadow-glow-accent:
-    0 0 0 1px rgb(124 58 237 / 0.22), 0 14px 48px -12px rgb(124 58 237 / 0.28);
+    0 0 0 1px rgb(93 90 122 / 0.35), 0 14px 48px -12px rgb(100 120 140 / 0.18);
 
   --text-page-title: clamp(2rem, 4.5vw, 3rem);
   --text-page-title--line-height: 1.12;
@@ -77,15 +80,21 @@
 
 body {
   background-color: var(--color-background);
-  background-image: radial-gradient(
-    ellipse 110% 55% at 50% -15%,
-    rgb(124 58 237 / 0.16) 0%,
-    transparent 52%
-  );
+  background-image:
+    radial-gradient(
+      ellipse 110% 55% at 50% -15%,
+      rgb(120 115 160 / 0.1) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 80% 45% at 50% 108%,
+      rgb(34 197 94 / 0.07) 0%,
+      transparent 48%
+    );
   color: var(--color-foreground);
 }
 
 select option {
-  background: #1e1b2e;
-  color: #e8e4f0;
+  background: #152820;
+  color: #e6ebe8;
 }

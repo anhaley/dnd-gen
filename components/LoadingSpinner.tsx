@@ -9,7 +9,7 @@ export default function LoadingSpinner() {
       className="py-14"
     >
       <div className="flex flex-col items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-border border-t-accent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-border border-t-accent-b" />
         <p className="mt-4 animate-pulse text-sm text-muted">
           Rolling the dice...
         </p>

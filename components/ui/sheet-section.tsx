@@ -27,7 +27,7 @@ function SectionGlyph() {
     <svg
       aria-hidden
       viewBox="0 0 16 16"
-      className="mt-0.5 h-4 w-4 shrink-0 text-accent-a/45"
+      className="mt-0.5 h-4 w-4 shrink-0 text-accent-b/55"
     >
       <circle cx="8" cy="8" r="2" fill="currentColor" />
       <path

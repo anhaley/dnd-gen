@@ -224,7 +224,7 @@ export default function CharacterSheet({
                 key={ability}
                 className="flex flex-col items-center rounded-lg border border-border bg-surface px-2 py-3"
               >
-                <span className="text-xs font-semibold uppercase tracking-wider text-accent-soft/80">
+                <span className="text-xs font-semibold uppercase tracking-wider text-accent-b/85">
                   {ability}
                 </span>
                 {editable ? (
@@ -569,7 +569,7 @@ function SpellcastingSection({
           return (
             <div key={level}>
               <div className="mb-1.5 flex items-baseline gap-2">
-                <span className="text-sm font-semibold text-accent-soft/90">
+                <span className="text-sm font-semibold text-accent-b/90">
                   {heading}
                 </span>
                 {level > 0 && slotInfo != null && (
@@ -642,7 +642,7 @@ function WeaponsSection({
                 editable
                 className="w-32 font-medium"
               />
-              <div className="flex items-center gap-1 text-sm text-accent-soft">
+              <div className="flex items-center gap-1 text-sm text-accent-b/90">
                 <EditableNumber
                   value={w.attackBonus}
                   onChange={(v) => onWeaponChange(i, { attackBonus: v })}
@@ -678,7 +678,7 @@ function WeaponsSection({
               className="flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-lg border border-border bg-surface px-4 py-2.5"
             >
               <span className="font-medium text-foreground">{w.name}</span>
-              <span className="text-sm text-accent-soft">
+              <span className="text-sm text-accent-b/90">
                 {formatBonus(w.attackBonus)} to hit
               </span>
               <span className="text-sm text-foreground/85">

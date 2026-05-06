@@ -229,7 +229,7 @@ export default function Home() {
         >
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-border px-4 py-4">
-              <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-accent-a-muted">
+              <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-accent-b/90">
                 Archives
               </h2>
               <span className="text-xs text-muted">
