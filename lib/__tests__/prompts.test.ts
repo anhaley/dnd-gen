@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { buildUserPrompt, SYSTEM_PROMPT } from "../prompts";
+import {
+  buildUserPrompt,
+  buildTweakUserPrompt,
+  SYSTEM_PROMPT,
+  TWEAK_SYSTEM_PROMPT,
+} from "../prompts";
 
 describe("SYSTEM_PROMPT", () => {
   it("references D&D 5E 2014", () => {
@@ -57,12 +62,82 @@ describe("SYSTEM_PROMPT", () => {
   });
 });
 
+describe("TWEAK_SYSTEM_PROMPT", () => {
+  it("extends SYSTEM_PROMPT with editing instructions", () => {
+    expect(TWEAK_SYSTEM_PROMPT.startsWith(SYSTEM_PROMPT)).toBe(true);
+    expect(TWEAK_SYSTEM_PROMPT).toContain("editing an existing character sheet");
+    expect(TWEAK_SYSTEM_PROMPT).toContain("minimize unrelated edits");
+  });
+});
+
+describe("buildTweakUserPrompt", () => {
+  it("includes JSON character and message", () => {
+    const base = {
+      name: "A",
+      race: "Human",
+      raceVariant: null,
+      class: "Cleric",
+      subclass: "Life Domain",
+      level: 3,
+      background: "Acolyte",
+      alignment: "NE",
+      abilityScores: { str: 10, dex: 10, con: 10, int: 10, wis: 14, cha: 12 },
+      hitPoints: 20,
+      armorClass: 18,
+      armorClassBreakdown: "Chain mail",
+      speed: "30 ft.",
+      proficiencyBonus: 2,
+      savingThrows: ["Wisdom", "Charisma"],
+      skills: ["Insight"],
+      proficiencies: [],
+      weapons: null,
+      equipment: [],
+      features: [],
+      spellSlots: null,
+      spells: null,
+      traits: {
+        personalityTraits: "",
+        ideals: "",
+        bonds: "",
+        flaws: "",
+      },
+      backstory: "",
+    };
+    const result = buildTweakUserPrompt(base, "Use a mace");
+    expect(result).toContain("Current character (JSON):");
+    expect(result).toContain(JSON.stringify(base));
+    expect(result).toContain("Apply this request:");
+    expect(result).toContain("Use a mace");
+  });
+});
+
 describe("buildUserPrompt", () => {
   it("returns random prompt when isRandom is true", () => {
     const result = buildUserPrompt({ isRandom: true });
     expect(result).toContain("completely random");
     expect(result).toContain("interesting and unique");
     expect(result).toContain("If this character is a spellcaster");
+  });
+
+  it("includes creative brief on random generation when instructions present", () => {
+    const result = buildUserPrompt({
+      isRandom: true,
+      instructions: "Priest of Orcus with a mace",
+    });
+    expect(result).toContain("User instructions");
+    expect(result).toContain("Priest of Orcus with a mace");
+    expect(result).toContain("If this character is a spellcaster");
+  });
+
+  it("includes creative brief on constrained generation", () => {
+    const result = buildUserPrompt({
+      class: "Cleric",
+      level: 5,
+      instructions: "Harper operative flavor",
+    });
+    expect(result).toContain("User instructions");
+    expect(result).toContain("Harper operative flavor");
+    expect(result).toContain("Class: Cleric");
   });
 
   it("returns random prompt when no constraints are given", () => {

@@ -88,9 +88,28 @@ export const GenerateInputSchema = z.object({
   level: z.number().min(1).max(20).optional(),
   background: z.string().optional(),
   isRandom: z.boolean().optional(),
+  instructions: z.preprocess(
+    (val) => {
+      if (val == null || val === "") return undefined;
+      const s = String(val).trim();
+      return s === "" ? undefined : s;
+    },
+    z.string().max(2000).optional()
+  ),
 });
 
 export type GenerateInput = z.infer<typeof GenerateInputSchema>;
+
+/** POST /api/tweak — natural-language refinement of an existing sheet */
+export const TweakInputSchema = z.object({
+  message: z.preprocess(
+    (val) => (typeof val === "string" ? val.trim() : ""),
+    z.string().min(1).max(4000)
+  ),
+  character: z.unknown(),
+});
+
+export type TweakInput = z.infer<typeof TweakInputSchema>;
 
 export interface SavedCharacter extends EnrichedCharacter {
   id: string;

@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import CharacterForm from "@/components/CharacterForm";
 import CharacterSheet from "@/components/CharacterSheet";
+import CharacterTweakPanel from "@/components/CharacterTweakPanel";
 import CharacterHistory from "@/components/CharacterHistory";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import SourcesModal from "@/components/SourcesModal";
@@ -27,7 +28,9 @@ export default function Home() {
   >(null);
   const [savedCharacters, setSavedCharacters] = useState<SavedCharacter[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTweaking, setIsTweaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tweakError, setTweakError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showSources, setShowSources] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -67,6 +70,7 @@ export default function Home() {
   const handleGenerate = useCallback(async (input: GenerateInput) => {
     setIsLoading(true);
     setError(null);
+    setTweakError(null);
 
     try {
       const res = await fetch("/api/generate", {
@@ -115,6 +119,7 @@ export default function Home() {
     setCharacter(char);
     originalCharacterRef.current = JSON.stringify(char);
     setError(null);
+    setTweakError(null);
     setShowHistory(false);
   }
 
@@ -193,6 +198,49 @@ export default function Home() {
         }
       }
     } catch {}
+  }
+
+  async function handleTweak(message: string): Promise<boolean> {
+    if (!character) return false;
+    setIsTweaking(true);
+    setTweakError(null);
+
+    try {
+      const res = await fetch("/api/tweak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ character, message }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const enriched: EnrichedCharacter = await res.json();
+      if ("id" in character && "savedAt" in character) {
+        const saved = character as SavedCharacter;
+        const updated = {
+          ...enriched,
+          id: saved.id,
+          savedAt: saved.savedAt,
+          userId: saved.userId,
+        };
+        setCharacter(updated);
+        originalCharacterRef.current = JSON.stringify(updated);
+      } else {
+        setCharacter(enriched);
+        originalCharacterRef.current = JSON.stringify(enriched);
+      }
+      return true;
+    } catch (err) {
+      setTweakError(
+        err instanceof Error ? err.message : "Failed to refine character"
+      );
+      return false;
+    } finally {
+      setIsTweaking(false);
+    }
   }
 
   return (
@@ -334,6 +382,12 @@ export default function Home() {
               </Alert>
             )}
 
+            {tweakError && (
+              <Alert className="mb-6">
+                <span className="font-semibold">Refinement:</span> {tweakError}
+              </Alert>
+            )}
+
             {isLoading && <LoadingSpinner />}
 
             {character && !isLoading && (
@@ -347,6 +401,11 @@ export default function Home() {
                     isExporting={isExporting}
                   />
                 </Card>
+
+                <CharacterTweakPanel
+                  disabled={isTweaking || isLoading}
+                  onSubmit={handleTweak}
+                />
 
                 {!isSignedIn && (
                   <p className="mt-4 text-center text-sm text-muted">

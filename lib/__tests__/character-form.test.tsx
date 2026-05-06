@@ -84,7 +84,9 @@ describe("CharacterForm", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Fully Random" }));
 
-      expect(onGenerate).toHaveBeenCalledWith({ isRandom: true });
+      expect(onGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({ isRandom: true })
+      );
     });
 
     it("calls onGenerate with form values when Generate Character is clicked", async () => {
@@ -100,15 +102,17 @@ describe("CharacterForm", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Generate Character" }));
 
-      expect(onGenerate).toHaveBeenCalledWith({
-        race: "Elf",
-        raceVariant: "High Elf",
-        class: "Wizard",
-        subclass: "Evocation",
-        level: 5,
-        background: "Sage",
-        isRandom: false,
-      });
+      expect(onGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          race: "Elf",
+          raceVariant: "High Elf",
+          class: "Wizard",
+          subclass: "Evocation",
+          level: 5,
+          background: "Sage",
+          isRandom: false,
+        })
+      );
     });
 
     it("sends undefined for empty optional fields", async () => {
@@ -116,15 +120,50 @@ describe("CharacterForm", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Generate Character" }));
 
-      expect(onGenerate).toHaveBeenCalledWith({
-        race: undefined,
-        raceVariant: undefined,
-        class: undefined,
-        subclass: undefined,
-        level: undefined,
-        background: undefined,
-        isRandom: false,
-      });
+      expect(onGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          race: undefined,
+          raceVariant: undefined,
+          class: undefined,
+          subclass: undefined,
+          level: undefined,
+          background: undefined,
+          isRandom: false,
+        })
+      );
+    });
+  });
+
+  describe("creative brief", () => {
+    it("passes trimmed instructions on Generate Character", async () => {
+      render(<CharacterForm onGenerate={onGenerate} isLoading={false} />);
+
+      await userEvent.type(
+        screen.getByLabelText(/creative brief/i),
+        "  priest of Orcus  "
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Generate Character" }));
+
+      expect(onGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          instructions: "priest of Orcus",
+          isRandom: false,
+        })
+      );
+    });
+
+    it("passes instructions with Fully Random when brief is filled", async () => {
+      render(<CharacterForm onGenerate={onGenerate} isLoading={false} />);
+
+      await userEvent.type(screen.getByLabelText(/creative brief/i), "mace wielder");
+      await userEvent.click(screen.getByRole("button", { name: "Fully Random" }));
+
+      expect(onGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isRandom: true,
+          instructions: "mace wielder",
+        })
+      );
     });
   });
 

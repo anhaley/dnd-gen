@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   CharacterSchema,
   GenerateInputSchema,
+  TweakInputSchema,
   WeaponSchema,
   AbilityScoresSchema,
   TraitsSchema,
@@ -252,5 +253,57 @@ describe("GenerateInputSchema", () => {
 
   it("accepts partial input", () => {
     expect(GenerateInputSchema.safeParse({ race: "Dwarf", level: 3 }).success).toBe(true);
+  });
+
+  it("trims and keeps instructions when non-empty", () => {
+    const result = GenerateInputSchema.safeParse({
+      instructions: "  priest of Orcus  ",
+      level: 3,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.instructions).toBe("priest of Orcus");
+    }
+  });
+
+  it("omits instructions when whitespace-only", () => {
+    const result = GenerateInputSchema.safeParse({ instructions: "   " });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.instructions).toBeUndefined();
+    }
+  });
+
+  it("rejects instructions over 2000 characters", () => {
+    expect(
+      GenerateInputSchema.safeParse({ instructions: "x".repeat(2001) }).success
+    ).toBe(false);
+  });
+});
+
+describe("TweakInputSchema", () => {
+  it("accepts message and character", () => {
+    const result = TweakInputSchema.safeParse({
+      message: "Give a darker backstory",
+      character: { name: "Test" },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("trims message", () => {
+    const result = TweakInputSchema.safeParse({
+      message: "  hello  ",
+      character: {},
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.message).toBe("hello");
+    }
+  });
+
+  it("rejects empty message after trim", () => {
+    expect(TweakInputSchema.safeParse({ message: "  ", character: {} }).success).toBe(
+      false
+    );
   });
 });

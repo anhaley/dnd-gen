@@ -1,5 +1,13 @@
-import { GenerateInput } from "./schemas";
+import type { Character, GenerateInput } from "./schemas";
 import { spellCountPromptSuffix } from "./spellcasting-counts";
+
+function appendUserInstructions(
+  promptBody: string,
+  instructions: string | undefined
+): string {
+  if (!instructions) return promptBody;
+  return `${promptBody}\n\nUser instructions (must respect where compatible with D&D 5E rules; where these conflict with structured constraints elsewhere in this message, prefer those structured constraints):\n${instructions}`;
+}
 
 export const SYSTEM_PROMPT = `You are a D&D 5E (2014) character generator. Use rules from: PHB, DMG, XGtE, TCoE, MotM, SCAG, EEPC, Fizban's, Curse of Strahd.
 
@@ -18,14 +26,26 @@ Rules:
 - speed: plain English, e.g. "30 ft." or "25 ft." — no flavor text, no non-English characters.
 - backstory: 2-3 sentences tying race, class, background, and traits.`;
 
+export const TWEAK_SYSTEM_PROMPT = `${SYSTEM_PROMPT}
+
+You are editing an existing character sheet given as JSON. The user will describe changes in natural language.
+
+Rules for this task:
+- Output a **complete** character object matching the same schema as generation (all fields required).
+- Apply the user's request faithfully while staying rules-consistent.
+- **Preserve** every field the user did not intend to change — minimize unrelated edits (scores, name, proficiencies, spell lists, etc.) unless the request implies mechanical updates.
+- When weapons, equipment, spells, AC, HP, features, or proficiencies must change to satisfy the request, update them so they remain mutually consistent per PHB-style D&D 5E logic.
+- The JSON you receive contains only base character data (no derived attack bonuses).`;
+
 export function buildUserPrompt(input: GenerateInput): string {
   const spellSuffix = spellCountPromptSuffix(input);
 
   if (input.isRandom) {
-    return (
-      "Create a completely random D&D 5E character. Pick a random race, class, subclass, background, and a level between 1 and 10. Make the character interesting and unique." +
-      spellSuffix
+    const core = appendUserInstructions(
+      "Create a completely random D&D 5E character. Pick a random race, class, subclass, background, and a level between 1 and 10. Make the character interesting and unique.",
+      input.instructions
     );
+    return core + spellSuffix;
   }
 
   const parts: string[] = ["Create a D&D 5E character with the following:"];
@@ -41,15 +61,24 @@ export function buildUserPrompt(input: GenerateInput): string {
   if (input.background) parts.push(`Background: ${input.background}`);
 
   if (parts.length === 1) {
-    return (
-      "Create a completely random D&D 5E character at a level between 1 and 10. Make the character interesting and unique." +
-      spellSuffix
+    const core = appendUserInstructions(
+      "Create a completely random D&D 5E character at a level between 1 and 10. Make the character interesting and unique.",
+      input.instructions
     );
+    return core + spellSuffix;
   }
 
   parts.push(
     "For any unspecified options, choose something that fits well with the given constraints."
   );
 
-  return parts.join("\n") + spellSuffix;
+  const core = appendUserInstructions(parts.join("\n"), input.instructions);
+  return core + spellSuffix;
+}
+
+export function buildTweakUserPrompt(
+  baseCharacter: Character,
+  message: string
+): string {
+  return `Current character (JSON):\n${JSON.stringify(baseCharacter)}\n\nApply this request:\n${message}`;
 }
