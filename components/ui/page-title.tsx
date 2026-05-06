@@ -26,7 +26,7 @@ export function PageTitle({
     >
       <h1
         className={cn(
-          "font-serif font-bold text-heading",
+          "font-display font-bold text-heading",
           variant === "hero" &&
             "text-page-title [letter-spacing:var(--text-page-title--letter-spacing)]",
           variant === "panel" && "text-center text-page-panel"

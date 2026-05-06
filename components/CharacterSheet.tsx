@@ -110,7 +110,7 @@ export default function CharacterSheet({
               value={character.name}
               onChange={(v) => update({ name: v })}
               editable
-              className="font-serif text-3xl font-bold text-heading"
+              className="font-sans text-3xl font-bold tracking-tight text-heading"
             />
             <div className="flex flex-wrap items-center gap-2 text-lg text-muted">
               <span>Level</span>
@@ -168,7 +168,7 @@ export default function CharacterSheet({
           </div>
         ) : (
           <>
-            <h2 className="font-serif text-3xl font-bold text-heading">
+            <h2 className="font-sans text-3xl font-bold tracking-tight text-heading">
               {character.name}
             </h2>
             <p className="mt-1 text-lg text-muted">

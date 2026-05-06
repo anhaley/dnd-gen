@@ -311,18 +311,18 @@ describe("Home page", () => {
       expect(screen.getByText("Sign in")).toBeDefined();
     });
 
-    it("shows History sidebar when signed in", async () => {
+    it("shows Archives sidebar when signed in", async () => {
       setSession("authenticated");
       await act(async () => { render(<Home />); });
 
-      expect(screen.getByText("History")).toBeDefined();
+      expect(screen.getByText("Archives")).toBeDefined();
     });
 
-    it("does not show History sidebar for anonymous users", () => {
+    it("does not show Archives sidebar for anonymous users", () => {
       setSession("unauthenticated");
       render(<Home />);
 
-      expect(screen.queryByText("History")).toBeNull();
+      expect(screen.queryByText("Archives")).toBeNull();
     });
 
     it("shows mobile history toggle when signed in", async () => {

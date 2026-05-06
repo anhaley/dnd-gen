@@ -229,8 +229,8 @@ export default function Home() {
         >
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-border px-4 py-4">
-              <h2 className="font-serif text-lg font-semibold text-heading">
-                History
+              <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-accent-a-muted">
+                Archives
               </h2>
               <span className="text-xs text-muted">
                 {savedCharacters.length} saved
@@ -256,100 +256,110 @@ export default function Home() {
         />
       )}
 
-      {/* Main content */}
-      <main className="flex-1 px-4 py-8 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-3xl">
-          {/* Auth header */}
-          <div className="mb-4 flex justify-end gap-3 text-sm">
-            {isSignedIn ? (
-              <>
-                <span className="text-muted">{session.user?.email}</span>
-                <button
-                  type="button"
-                  onClick={() => signOut()}
-                  className={linkButtonClass}
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              status !== "loading" && (
-                <Link href="/signin" className={linkButtonClass}>
-                  Sign in
-                </Link>
-              )
-            )}
-          </div>
-
-          {/* Title */}
-          <header className="mb-6 text-center">
-            <PageTitle
-              variant="hero"
-              title="D&D Character Generator"
-              subtitle="Create a 5th Edition (2014) character in seconds"
-            />
-            <Button
-              type="button"
-              variant="subtle"
-              onClick={() => setShowSources(true)}
-              className="mt-3 inline-flex items-center gap-1.5"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="h-4 w-4"
-              >
-                <path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.04a.75.75 0 00-.546-.721A9.006 9.006 0 0015 2a8.963 8.963 0 00-4.25 1.065V16.82zM9.25 4.065A8.963 8.963 0 005 3a9.006 9.006 0 00-2.454.319A.75.75 0 002 4.04v12.02a.75.75 0 00.954.721A7.462 7.462 0 015 16.5c1.578 0 3.05.488 4.25 1.32V4.065z" />
-              </svg>
-              Sources
-            </Button>
-          </header>
-
-          <SourcesModal
-            open={showSources}
-            onClose={() => setShowSources(false)}
-          />
-
-          {/* Form card */}
-          <Card className="mb-6 p-5 sm:p-6">
-            <CharacterForm onGenerate={handleGenerate} isLoading={isLoading} />
-          </Card>
-
-          {/* Error */}
-          {error && (
-            <Alert className="mb-6">
-              <span className="font-semibold">Error:</span> {error}
-            </Alert>
-          )}
-
-          {/* Loading */}
-          {isLoading && <LoadingSpinner />}
-
-          {/* Character sheet */}
-          {character && !isLoading && (
-            <>
-              <Card ref={sheetRef} className="p-5 sm:p-6">
-                <CharacterSheet
-                  character={character}
-                  editable
-                  onChange={handleCharacterEdit}
-                  onExport={handleExport}
-                  isExporting={isExporting}
-                />
-              </Card>
-
-              {!isSignedIn && (
-                <p className="mt-4 text-center text-sm text-muted">
+      {/* Main content — zoned: header strip / workbench / result */}
+      <main className="flex-1">
+        <section
+          aria-label="Site header"
+          className="border-b border-border-strong/25 bg-surface-muted/55"
+        >
+          <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8 lg:px-12">
+            <div className="mb-4 flex justify-end gap-3 text-sm">
+              {isSignedIn ? (
+                <>
+                  <span className="text-muted">{session.user?.email}</span>
+                  <button
+                    type="button"
+                    onClick={() => signOut()}
+                    className={linkButtonClass}
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                status !== "loading" && (
                   <Link href="/signin" className={linkButtonClass}>
                     Sign in
-                  </Link>{" "}
-                  to save characters and build your collection.
-                </p>
+                  </Link>
+                )
               )}
-            </>
-          )}
-        </div>
+            </div>
+
+            <header className="text-center">
+              <PageTitle
+                variant="hero"
+                title="D&D Character Generator"
+                subtitle="Create a 5th Edition (2014) character in seconds"
+              />
+              <Button
+                type="button"
+                variant="subtle"
+                onClick={() => setShowSources(true)}
+                className="mt-3 inline-flex items-center gap-1.5"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="h-4 w-4"
+                >
+                  <path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.04a.75.75 0 00-.546-.721A9.006 9.006 0 0015 2a8.963 8.963 0 00-4.25 1.065V16.82zM9.25 4.065A8.963 8.963 0 005 3a9.006 9.006 0 00-2.454.319A.75.75 0 002 4.04v12.02a.75.75 0 00.954.721A7.462 7.462 0 015 16.5c1.578 0 3.05.488 4.25 1.32V4.065z" />
+                </svg>
+                Sources
+              </Button>
+            </header>
+          </div>
+        </section>
+
+        <SourcesModal
+          open={showSources}
+          onClose={() => setShowSources(false)}
+        />
+
+        <section
+          aria-label="Generation"
+          className="border-b border-border/40 bg-background"
+        >
+          <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8 lg:px-12">
+            <Card variant="glow" className="p-5 sm:p-6">
+              <CharacterForm onGenerate={handleGenerate} isLoading={isLoading} />
+            </Card>
+          </div>
+        </section>
+
+        <section aria-label="Character" className="bg-surface-muted/35">
+          <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8 lg:px-12">
+            {error && (
+              <Alert className="mb-6">
+                <span className="font-semibold">Error:</span> {error}
+              </Alert>
+            )}
+
+            {isLoading && <LoadingSpinner />}
+
+            {character && !isLoading && (
+              <>
+                <Card ref={sheetRef} className="p-5 sm:p-6">
+                  <CharacterSheet
+                    character={character}
+                    editable
+                    onChange={handleCharacterEdit}
+                    onExport={handleExport}
+                    isExporting={isExporting}
+                  />
+                </Card>
+
+                {!isSignedIn && (
+                  <p className="mt-4 text-center text-sm text-muted">
+                    <Link href="/signin" className={linkButtonClass}>
+                      Sign in
+                    </Link>{" "}
+                    to save characters and build your collection.
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        </section>
       </main>
 
       {/* Floating recalculate button */}

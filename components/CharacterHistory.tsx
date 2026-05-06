@@ -33,10 +33,10 @@ export default function CharacterHistory({
         <div
           key={char.id}
           className={cn(
-            "group flex cursor-pointer items-start justify-between rounded-lg border px-3 py-2.5 transition",
+            "group flex cursor-pointer items-start justify-between rounded-lg border border-border/25 border-l-2 px-3 py-2.5 transition",
             activeId === char.id
-              ? "border-primary/50 bg-primary/10 shadow-surface"
-              : "border-transparent hover:border-border hover:bg-surface-muted hover:shadow-surface"
+              ? "border-l-accent-a bg-accent-a/10 shadow-surface"
+              : "border-l-transparent hover:border-border/50 hover:bg-surface-muted hover:shadow-surface"
           )}
           onClick={() => onLoad(char)}
         >

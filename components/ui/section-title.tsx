@@ -8,7 +8,7 @@ export function SectionTitle({
   return (
     <h3
       className={cn(
-        "mb-3 font-serif text-section font-semibold leading-snug text-heading",
+        "mb-3 font-sans text-section font-semibold leading-snug tracking-wide text-heading",
         className
       )}
       {...props}

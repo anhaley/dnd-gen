@@ -1,45 +1,72 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-background: #0c0a09;
-  --color-foreground: #e7e5e4;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-cinzel), ui-serif, Georgia, serif;
+/*
+ * Style contract — Arcane Laboratory (dual accents)
+ * ---------------------------------------------------------------------------
+ * Accent A (violet): primary CTAs, links, FAB save, focus rings, hero chrome.
+ * Accent B (teal): secondary CTAs, success highlights, FAB recalculate — never
+ * mixed on the same control (no violet fill + teal border on one button).
+ *
+ * | Variant       | Accent | Notes                                      |
+ * |---------------|--------|--------------------------------------------|
+ * | primary       | A      | Solid violet; text light                   |
+ * | secondary     | B*     | Neutral border; hover uses B only          |
+ * | subtle        | none   | Border neutral; hover heading text         |
+ * | ghost         | A      | Text link-style violet → heading on hover  |
+ * | danger        | rose   | Errors only — not A/B                      |
+ * | fabPrimary    | A      | Save                                       |
+ * | fabSecondary  | B      | Recalculate                                |
+ * | fabIcon       | A      | Single accent for menu/history toggle      |
+ * ---------------------------------------------------------------------------
+ * Glow: --shadow-glow-accent — reserved for the main form card only.
+ */
 
-  /* Semantic surfaces & borders (stone + amber accent family) */
-  --color-surface: rgb(28 25 23 / 0.55);
-  --color-surface-elevated: rgb(28 25 23 / 0.92);
-  --color-surface-muted: rgb(12 10 9 / 0.6);
-  --color-border: rgb(120 53 15 / 0.22);
-  --color-border-strong: rgb(120 53 15 / 0.38);
-  --color-muted: rgb(168 162 158);
-  --color-heading: rgb(254 243 199);
-  --color-accent: rgb(251 191 36);
-  --color-accent-soft: rgb(253 230 138 / 0.85);
-  --color-primary: rgb(180 83 9);
-  --color-primary-hover: rgb(217 119 6);
+@theme inline {
+  --color-background: #0e0c14;
+  --color-foreground: #e8e4f0;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-marcellus), ui-serif, Georgia, serif;
+
+  /* Dual accents */
+  --color-accent-a: #a78bfa;
+  --color-accent-a-muted: rgb(167 139 250 / 0.55);
+  --color-accent-b: #2dd4bf;
+  --color-accent-b-muted: rgb(45 212 191 / 0.45);
+
+  /* Semantic map (consumers use accent / primary / ring-focus) */
+  --color-accent: #a78bfa;
+  --color-accent-soft: rgb(196 181 253 / 0.88);
+  --color-primary: #7c3aed;
+  --color-primary-hover: #6d28d9;
+  --color-heading: rgb(237 233 254);
+  --color-muted: rgb(180 174 198);
+  --color-surface: #1e1b2e;
+  --color-surface-elevated: #252136;
+  --color-surface-muted: rgb(18 16 28 / 0.72);
+  --color-border: rgb(139 92 246 / 0.18);
+  --color-border-strong: rgb(167 139 250 / 0.28);
   --color-danger: rgb(252 165 165);
   --color-danger-foreground: rgb(254 226 226);
-  --color-danger-border: rgb(127 29 29 / 0.45);
-  --color-danger-surface: rgb(69 10 10 / 0.35);
-  --color-overlay: rgb(0 0 0 / 0.5);
-  --color-ring-focus: rgb(245 158 11 / 0.45);
+  --color-danger-border: rgb(190 18 60 / 0.45);
+  --color-danger-surface: rgb(88 28 28 / 0.4);
+  --color-overlay: rgb(0 0 0 / 0.55);
+  --color-ring-focus: rgb(167 139 250 / 0.55);
 
-  /* Elevation: background → surface → elevated / FAB */
-  --shadow-surface: 0 1px 2px rgb(0 0 0 / 0.14);
+  --shadow-surface: 0 1px 2px rgb(0 0 0 / 0.2);
   --shadow-card:
-    0 1px 2px rgb(0 0 0 / 0.22), 0 12px 36px -10px rgb(0 0 0 / 0.42);
+    0 1px 2px rgb(0 0 0 / 0.28), 0 12px 36px -10px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.04);
   --shadow-elevated:
-    0 10px 40px -12px rgb(0 0 0 / 0.48), 0 4px 12px rgb(0 0 0 / 0.22);
+    0 10px 40px -12px rgb(0 0 0 / 0.55), 0 4px 12px rgb(0 0 0 / 0.28);
   --shadow-fab:
-    0 14px 44px -10px rgb(0 0 0 / 0.55), 0 6px 16px rgb(0 0 0 / 0.35);
-  --shadow-button-hover:
-    0 6px 18px -4px rgb(0 0 0 / 0.38);
+    0 14px 44px -10px rgb(0 0 0 / 0.58), 0 6px 16px rgb(0 0 0 / 0.38);
+  --shadow-button-hover: 0 6px 18px -4px rgb(0 0 0 / 0.42);
+  --shadow-glow-accent:
+    0 0 0 1px rgb(124 58 237 / 0.22), 0 14px 48px -12px rgb(124 58 237 / 0.28);
 
-  /* Typography scale (PageTitle, SectionTitle, sheet body) */
   --text-page-title: clamp(2rem, 4.5vw, 3rem);
   --text-page-title--line-height: 1.12;
-  --text-page-title--letter-spacing: -0.025em;
+  --text-page-title--letter-spacing: -0.02em;
   --text-page-subtitle: 0.9375rem;
   --text-page-subtitle--line-height: 1.5;
   --text-page-panel: 1.875rem;
@@ -49,11 +76,16 @@
 }
 
 body {
-  background: var(--color-background);
+  background-color: var(--color-background);
+  background-image: radial-gradient(
+    ellipse 110% 55% at 50% -15%,
+    rgb(124 58 237 / 0.16) 0%,
+    transparent 52%
+  );
   color: var(--color-foreground);
 }
 
 select option {
-  background: #1c1917;
-  color: #e7e5e4;
+  background: #1e1b2e;
+  color: #e8e4f0;
 }

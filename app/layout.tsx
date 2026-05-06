@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, Inter } from "next/font/google";
+import { Inter, Marcellus } from "next/font/google";
 import Providers from "@/components/Providers";
 import "./globals.css";
 
@@ -9,10 +9,10 @@ const inter = Inter({
   display: "swap",
 });
 
-const cinzel = Cinzel({
+const marcellus = Marcellus({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-cinzel",
+  weight: "400",
+  variable: "--font-marcellus",
   display: "swap",
 });
 
@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${cinzel.variable}`}
+      className={`dark ${inter.variable} ${marcellus.variable}`}
     >
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>

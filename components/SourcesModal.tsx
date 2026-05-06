@@ -50,7 +50,7 @@ export default function SourcesModal({ open, onClose }: SourcesModalProps) {
     >
       <div className="p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-serif text-xl font-semibold text-heading">
+          <h2 className="font-sans text-xl font-semibold tracking-wide text-heading">
             Included Sources
           </h2>
           <Button
@@ -80,7 +80,9 @@ export default function SourcesModal({ open, onClose }: SourcesModalProps) {
               key={name}
               className="flex items-center gap-2 text-sm text-foreground/90"
             >
-              <span className="text-primary/70">&#x2022;</span>
+              <span className="text-accent-b/80" aria-hidden>
+                &#x2022;
+              </span>
               {name}
             </li>
           ))}
