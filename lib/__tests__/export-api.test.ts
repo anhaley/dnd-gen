@@ -4,10 +4,16 @@ vi.mock("@/lib/pdf", () => ({
   fillCharacterSheet: vi.fn(),
 }));
 
+vi.mock("@/auth", () => ({
+  auth: vi.fn(),
+}));
+
 import { POST } from "@/app/api/export/route";
 import { fillCharacterSheet } from "@/lib/pdf";
+import { auth } from "@/auth";
 
 const mockFillCharacterSheet = fillCharacterSheet as ReturnType<typeof vi.fn>;
+const mockAuth = auth as ReturnType<typeof vi.fn>;
 
 function makeCharacterBody() {
   return {
@@ -55,9 +61,20 @@ function makeRequest(body: Record<string, unknown>) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockAuth.mockResolvedValue({ user: { id: "user-1" } });
 });
 
 describe("POST /api/export", () => {
+  it("returns 401 when not authenticated", async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const response = await POST(makeRequest(makeCharacterBody()));
+
+    expect(response.status).toBe(401);
+    const data = await response.json();
+    expect(data.error).toBe("Unauthorized");
+  });
+
   it("returns PDF bytes with correct content type", async () => {
     const fakePdf = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
     mockFillCharacterSheet.mockResolvedValue(fakePdf);

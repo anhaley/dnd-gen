@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { fillCharacterSheet } from "@/lib/pdf";
 import type { EnrichedCharacter } from "@/lib/schemas";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     console.log("[export] POST /api/export");
     const body: EnrichedCharacter = await request.json();
 

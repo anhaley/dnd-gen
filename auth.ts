@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -12,7 +13,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
+        const ip =
+          (request as Request | undefined)
+            ?.headers?.get("x-forwarded-for")
+            ?.split(",")[0]
+            .trim() ?? "unknown";
+        const { allowed } = checkRateLimit(`signin:${ip}`);
+        if (!allowed) return null;
+
         const email = credentials?.email as string | undefined;
         const password = credentials?.password as string | undefined;
         if (!email || !password) return null;

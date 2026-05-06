@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
@@ -10,6 +11,20 @@ const BCRYPT_ROUNDS = 12;
 
 export async function POST(request: Request) {
   try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+      "unknown";
+    const { allowed, retryAfterMs } = checkRateLimit(`signup:${ip}`);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(Math.ceil(retryAfterMs / 1000)) },
+        }
+      );
+    }
+
     const body = await request.json();
     const email = (body.email as string | undefined)?.trim().toLowerCase();
     const password = body.password as string | undefined;
